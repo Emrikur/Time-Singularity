@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import {Request, Response, NextFunction} from "express"
 import cors from 'cors';
-import { getEnv }  from './src/config/env';
+// import { getEnv }  from './src/config/env';
 import router from './src/api/routes/auth';
 import graphRoutes from "./src/api/routes/graphRoutes"
 import modalRoute from "./src/api/routes/modalRoute"
@@ -11,13 +11,13 @@ import companyRoute from "./src/api/routes/companyRoute"
 import userRoute from './src/api/routes/userRoute';
 
 
-const env = getEnv();
+// const env = getEnv();
 const app = express();
-const PORT = env.PORT;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors({
   origin:
-  [ env.FRONTEND_ORIGIN,
+  [ process.env.FRONTEND_ORIGIN || "http://localhost:5173",
     "https://time-singularity.vercel.app",
     "http://localhost:5173",
     "http://localhost:4173"
@@ -25,7 +25,7 @@ app.use(cors({
   credentials: true,
 }));
 
-console.log(`CORS enabled for: ${env.FRONTEND_ORIGIN}`);
+
 
 
 
@@ -51,5 +51,5 @@ app.use((err:Error, req: Request, res: Response, next: NextFunction) => {
 
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
-  console.log(`CORS enabled for frontend: ${env.FRONTEND_ORIGIN || 'http://localhost:5173'}`);
+  console.log(`CORS enabled for frontend: ${process.env.FRONTEND_ORIGIN || 'http://localhost:5173'}`);
 });

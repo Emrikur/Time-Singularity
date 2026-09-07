@@ -106,21 +106,23 @@
   }
 
   #log-modal[open] {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    display: flex;
-    flex-direction: column;
-    z-index: 200;
-    box-sizing: border-box;
-    width: 100%;
-    height: fit-content;
-    overflow-y: scroll;
-    border-radius: 5px;
-    position: absolute;
-    margin: 0 auto;
-    background-color: #ffffff;
-    pointer-events: auto;
-     top: 12%;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  box-sizing: border-box;
+  width: 90%;
+  max-height: calc(100vh - 2rem);
+  height: calc(100vh - 2rem);
+  overflow-y: scroll;
+  border-radius: 5px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(0) scale(1);
+  background-color: #ffffff;
+  pointer-events: auto;
+  top: 1rem;
 
   .close-modal {
     align-self: flex-end;
