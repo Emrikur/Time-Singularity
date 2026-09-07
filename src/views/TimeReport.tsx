@@ -37,6 +37,10 @@ async function handleFormSubmit(e:React.FormEvent<HTMLFormElement>){
       toast.error("Description can't exceed 150 characters")
       return
     }
+    if (new Date(form.date.value) > new Date()) {
+  toast.error("You can't log hours for future dates!");
+  return;
+}
   if(Number(form.hours.value) > 24){
     toast.error("May only log a maximum of 24 hours")
     return;
