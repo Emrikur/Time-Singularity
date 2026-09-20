@@ -18,13 +18,14 @@ import {
 } from "../lib/functions";
 import type { EntryTypes, TimesheetTypes } from "../lib/types";
 import { useAuth } from "../hooks/useAuth";
+import { toast } from "react-toastify";
 export default function Approvals() {
 
   const { token } = useAuth();
   const [entries, setEntries] = useState<EntryTypes[]>([]);
   const [timesheets, setTimesheets] = useState<TimesheetTypes[]>([]);
   const [refresh, setRefresh] = useState(false);
-  const [expandedtoggleId, setExpandedToggleId] = useState<number | null>(null);
+  const [expandedtoggleId, setExpandedToggleId] = useState<string | null>(null);
 
   const companyColors = [
     "#2563EB",
@@ -126,13 +127,13 @@ export default function Approvals() {
                     </div>
                     <div className="timesheet-list-status-toggle">
                       <p>{timesheet.status}</p>
-                      {expandedtoggleId === Number(timesheet.id) ? (
+                      {expandedtoggleId === timesheet.id ? (
                         <ArrowDown
                           onClick={() =>
                             setExpandedToggleId(
-                              expandedtoggleId === Number(timesheet.id)
+                              expandedtoggleId === timesheet.id
                                 ? null
-                                : Number(timesheet.id),
+                                : timesheet.id,
                             )
                           }
                         />
@@ -140,16 +141,16 @@ export default function Approvals() {
                         <ArrowRight
                           onClick={() =>
                             setExpandedToggleId(
-                              expandedtoggleId === Number(timesheet.id)
+                              expandedtoggleId === timesheet.id
                                 ? null
-                                : Number(timesheet.id),
+                                : timesheet.id,
                             )
                           }
                         />
                       )}
                     </div>
                   </div>
-                  {expandedtoggleId === Number(timesheet.id) && (
+                  {expandedtoggleId === timesheet.id && (
                     <div className="entries-container">
                       {entries
                         .filter(
@@ -321,10 +322,16 @@ export default function Approvals() {
                         </button>
                         <button
                           className="edit-button"
-                          onClick={async() => {
-                            const response = await handleApproval(timesheet.id, token, "edit");
-                            if (response) {
-                              handleRefresh();
+                          onClick={async () => {
+                            try {
+                              const response = await handleApproval(timesheet.id, token, "edit");
+                              if (response) {
+                                toast.success("Timesheet returned for editing");
+                                handleRefresh();
+                              }
+                            } catch (error) {
+                              toast.error("Could not return timesheet for editing");
+                              console.error("Failed to return timesheet for editing", error);
                             }
                           }}
                         >

@@ -138,8 +138,13 @@ export default function Timesheets() {
       expense: entry.expense || "",
       description: entry.description || "",
     });
-    entryModalRef.current?.showModal();
   }
+
+  useEffect(() => {
+    if (selectedEntry && entryModalRef.current && !entryModalRef.current.open) {
+      entryModalRef.current.showModal();
+    }
+  }, [selectedEntry]);
 
   function closeEditModal() {
     entryModalRef.current?.close();
@@ -152,9 +157,18 @@ export default function Timesheets() {
       return;
     }
 
-    await updateDraftEntry(selectedEntry.id, token, editForm);
-    closeEditModal();
-    handleRefresh();
+    try {
+      const response = await updateDraftEntry(selectedEntry.id, token, editForm);
+      toast.success(response.message || "Entry updated");
+      closeEditModal();
+      handleRefresh();
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Could not update entry");
+      }
+    }
   }
 
   useEffect(() => {
