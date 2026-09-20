@@ -1,4 +1,4 @@
-import {queryAddNewUser, getAllUsers, queryAdminEntries, queryAdminTS, querySubmittedEntries, querySetTimesheetApproval, querySetTimesheetRejection} from "../../services/dbCalls"
+import {queryAddNewUser, getAllUsers, queryAdminEntries, queryAdminTS, querySubmittedEntries, querySetTimesheetApproval, querySetTimesheetRejection, querySetTimesheetForEdit} from "../../services/dbCalls"
 import { Request, Response } from "express";
 
 
@@ -59,6 +59,11 @@ if(action === "approve"){
 
   const response = await querySetTimesheetRejection(timesheetId);
 res.json(response)
+
+}else if(action === "edit"){
+
+  const response = await querySetTimesheetForEdit(timesheetId);
+  res.json(response)
 
 }
 }

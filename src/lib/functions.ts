@@ -230,6 +230,28 @@ return {message:response}
 
     }
 
+export async function updateDraftEntry(
+  entryId: string,
+  token: string,
+  data: {
+    companyId: string;
+    date: string;
+    hours: string;
+    mileage: string;
+    expense: string;
+    description: string;
+  },
+) {
+  const response = await axios({
+    method: "put",
+    url: `${import.meta.env.VITE_API_URL}/user/timesheet/updateEntry`,
+    headers: { Authorization: "Bearer " + token },
+    data: { entryId, ...data },
+  });
+
+  return response.data;
+}
+
 
 
 //##############################################################################
@@ -337,7 +359,7 @@ return response
     }
 
 
-    export async function handleApproval(timesheetId:string, token:string | null, action:"approve" | "reject") {
+    export async function handleApproval(timesheetId:string, token:string | null, action:"approve" | "reject" | "edit") {
 
       if (!token) {
         throw new Error("No token provided");
@@ -345,7 +367,7 @@ return response
       if (!timesheetId) {
         throw new Error("No timesheet ID provided");
       }
-      if (action !== "approve" && action !== "reject") {
+      if (action !== "approve" && action !== "reject" && action !== "edit") {
         throw new Error("Invalid action provided");
       }
       if (action === "approve") {
@@ -382,6 +404,20 @@ return response
 console.log("Response from handleApproval: ", response)
         return response;
 
+      } else {
+if (!window.confirm("Are you sure you want to send this timesheet back for editing?")) {
+  console.log("Edit request cancelled by user");
+  return;
+}
+
+const response = await axios({
+  method: "put",
+  url: `${import.meta.env.VITE_API_URL}/admin/timesheet/approval`,
+  headers: { Authorization: "Bearer " + token },
+  data: { timesheetId, action },
+});
+
+return response;
       }
     }
 

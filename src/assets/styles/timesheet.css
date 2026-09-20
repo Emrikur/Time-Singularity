@@ -404,6 +404,57 @@ width: 35px;
   border: none;
 }
 
+#edit-entry-modal {
+  width: min(90%, 30rem);
+  max-height: calc(100vh - 2rem);
+  border: none;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#edit-entry-modal::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#edit-entry-modal .close-modal {
+  display: flex;
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.edit-entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.edit-entry-form h2 {
+  margin: 0 0 0.5rem;
+}
+
+.edit-entry-form input,
+.edit-entry-form select,
+.edit-entry-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0.5rem;
+  font: inherit;
+}
+
+.edit-entry-form textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
 .latest-timesheets-wrapper {
   width: 100%;
   border-radius: 10px;
@@ -522,10 +573,27 @@ color:white;
 font-weight: 500;
 font-size: 1rem;
   border:none;
+  flex: 1;
   width:100%;
   padding:0.5rem 1rem;
   height:2.5rem;
-  margin-right:0.5rem
+  margin-right:0
+}
+.edit-button{
+  background: #f59e0b;
+  background: linear-gradient(
+    180deg,
+    #fbbf24 0%,
+    #d97706 100%
+  );
+  color:white;
+  font-weight: 500;
+  font-size: 1rem;
+  border:none;
+  flex: 1;
+  width:100%;
+  padding:0.5rem 1rem;
+  height:2.5rem;
 }
 .approve-button{
   background: #22c55e;
@@ -538,6 +606,7 @@ font-weight: 500;
 font-size: 1rem;
 color:white;
   border:none;
+  flex: 1;
   width:100%;
   padding:0.5rem 1rem;
   height:2.5rem;

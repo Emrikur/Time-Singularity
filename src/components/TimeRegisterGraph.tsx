@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../assets/styles/graphs.css";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +19,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { X } from "lucide-react";
 
 ChartJS.register(
   CategoryScale,
@@ -45,6 +46,10 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
     work_date: string;
     hours_worked: string;
     filter:Filter
+    description?: string;
+    mileage?: string;
+    expense?: string;
+    status?: string;
   }
 
 
@@ -53,6 +58,19 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
   const [filter, setGraphFilter] = useState<Filter>("week");
   const [responseData, setResponseData] = useState<GraphType[]>([]);
   const [currentWeek, setCurrentWeek] = useState<GraphType[]>([])
+  const [selectedEntry, setSelectedEntry] = useState<GraphType | null>(null);
+  const entryModalRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    if (selectedEntry && entryModalRef.current && !entryModalRef.current.open) {
+      entryModalRef.current.showModal();
+    }
+  }, [selectedEntry]);
+
+  function closeEntryModal() {
+    entryModalRef.current?.close();
+    setSelectedEntry(null);
+  }
 
   useEffect(() => {
     async function getGraph() {
@@ -221,6 +239,44 @@ style={{margin:"0", padding:"0"}}
         </div>
         {/* Graphs */}
         <div>
+          <dialog
+            ref={entryModalRef}
+            id="entry-detail-modal"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) {
+                closeEntryModal();
+              }
+            }}
+            onClose={() => setSelectedEntry(null)}
+          >
+            <button
+              type="button"
+              className="close-modal"
+              aria-label="Close entry details"
+              onClick={closeEntryModal}
+            >
+              <X width={28} height={28} />
+            </button>
+            {selectedEntry && (
+              <div className="entry-detail-content">
+                <h2>Entry details</h2>
+                <dl>
+                  <div><dt>Company</dt><dd>{selectedEntry.company_name}</dd></div>
+                  <div><dt>Date</dt><dd>{formatEventDateTime(selectedEntry.work_date, { year: "numeric", month: "long", day: "numeric" })}</dd></div>
+                  <div><dt>Hours worked</dt><dd>{selectedEntry.hours_worked} h</dd></div>
+                  <div><dt>Description</dt><dd>{selectedEntry.description || "—"}</dd></div>
+                  {selectedEntry.mileage !== undefined && selectedEntry.mileage !== "" && (
+                    <div><dt>Mileage</dt><dd>{selectedEntry.mileage}</dd></div>
+                  )}
+                  {selectedEntry.expense !== undefined && selectedEntry.expense !== "" && (
+                    <div><dt>Expense</dt><dd>{selectedEntry.expense}</dd></div>
+                  )}
+                  <div><dt>Status</dt><dd>{selectedEntry.status || "—"}</dd></div>
+                </dl>
+              </div>
+            )}
+          </dialog>
+
           {responseData && responseData.length > 0 ? (
             <div >
               <div style={{marginBottom:"2rem"}}>
@@ -260,11 +316,25 @@ style={{margin:"0", padding:"0"}}
                   <tbody>
 
                     {responseData && sortedData.slice(-5).reverse().map((p) => (
-                      <tr key={p.id}
+                      <tr key={p.id} style={{ cursor: "pointer" }}
+                        onClick={() => setSelectedEntry(p)}
                       >
 
                         <td>{formatEventDateTime(p.work_date)}</td>
-                        <td style={{textDecoration:"underline"}} onClick={() => navigate(`/company/${p.company_name}`,{state: {id:p.company_id}})}>{p.company_name}</td>
+                        <td>
+                          <a
+                            href={`/company/${p.company_name}`}
+                            style={{ textDecoration: "underline" }}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              closeEntryModal();
+                              navigate(`/company/${p.company_name}`, { state: { id: p.company_id } });
+                            }}
+                          >
+                            {p.company_name}
+                          </a>
+                        </td>
                         <td>{p.hours_worked}</td>
                       </tr>
                     ))}

@@ -1,13 +1,14 @@
 import LayoutWrapper from "../components/LayoutWrapper";
 import "../assets/styles/timesheet.css";
-import { CalendarRange, Clock, ListFilter, Building2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CalendarRange, Clock, ListFilter, Building2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import {
   formatEventDateTime,
   deleteEntry,
+  updateDraftEntry,
   signoffTimesheet,
   fetchTimesheets,
   getdraftMonthNames
@@ -37,6 +38,17 @@ export default function Timesheets() {
   );
   const [timesheets, setTimesheets] = useState<TimesheetTypes[]>([]);
   const [refresh, setRefresh] = useState(false);
+  const [companies, setCompanies] = useState<{ id: string; name: string; is_active: boolean }[]>([]);
+  const [selectedEntry, setSelectedEntry] = useState<EntryTypes | null>(null);
+  const entryModalRef = useRef<HTMLDialogElement>(null);
+  const [editForm, setEditForm] = useState({
+    companyId: "",
+    date: "",
+    hours: "",
+    mileage: "",
+    expense: "",
+    description: "",
+  });
   const uniqueCompanyNameList = [
     ...new Set(entries.map((entry) => entry.company_name)),
   ];
@@ -116,6 +128,35 @@ export default function Timesheets() {
     setRefresh(!refresh);
   }
 
+  function openEditModal(entry: EntryTypes) {
+    setSelectedEntry(entry);
+    setEditForm({
+      companyId: entry.company_id,
+      date: entry.work_date.slice(0, 10),
+      hours: entry.hours_worked,
+      mileage: entry.mileage || "",
+      expense: entry.expense || "",
+      description: entry.description || "",
+    });
+    entryModalRef.current?.showModal();
+  }
+
+  function closeEditModal() {
+    entryModalRef.current?.close();
+    setSelectedEntry(null);
+  }
+
+  async function handleEditSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!token || !selectedEntry) {
+      return;
+    }
+
+    await updateDraftEntry(selectedEntry.id, token, editForm);
+    closeEditModal();
+    handleRefresh();
+  }
+
   useEffect(() => {
 
     if(!token){
@@ -157,9 +198,103 @@ export default function Timesheets() {
     getEntries();
   }, [selectedOption, refresh, token]);
 
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    axios({
+      method: "get",
+      url: `${import.meta.env.VITE_API_URL}/modal/companies`,
+      headers: { Authorization: "Bearer " + token },
+    }).then((response) => {
+      setCompanies(response.data);
+    });
+  }, [token]);
+
   return (
     <LayoutWrapper>
       <section className="timesheets-wrapper">
+        <dialog
+          id="edit-entry-modal"
+          ref={entryModalRef}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              closeEditModal();
+            }
+          }}
+        >
+          <button
+            type="button"
+            className="close-modal"
+            aria-label="Close edit entry modal"
+            onClick={closeEditModal}
+          >
+            <X width={28} height={28} />
+          </button>
+          <form className="edit-entry-form" onSubmit={handleEditSubmit}>
+            <h2>Edit entry</h2>
+            <label htmlFor="edit-company">Company</label>
+            <select
+              id="edit-company"
+              value={editForm.companyId}
+              onChange={(event) => setEditForm({ ...editForm, companyId: event.target.value })}
+              required
+            >
+              {companies.filter((company) => company.is_active).map((company) => (
+                <option key={company.id} value={company.id}>{company.name}</option>
+              ))}
+            </select>
+            <label htmlFor="edit-date">Date</label>
+            <input
+              id="edit-date"
+              type="date"
+              max={new Date().toISOString().split("T")[0]}
+              value={editForm.date}
+              onChange={(event) => setEditForm({ ...editForm, date: event.target.value })}
+              required
+            />
+            <label htmlFor="edit-hours">Hours worked</label>
+            <input
+              id="edit-hours"
+              type="number"
+              min="0"
+              max="24"
+              step="0.01"
+              value={editForm.hours}
+              onChange={(event) => setEditForm({ ...editForm, hours: event.target.value })}
+              required
+            />
+            <label htmlFor="edit-mileage">Mileage (optional)</label>
+            <input
+              id="edit-mileage"
+              type="number"
+              min="0"
+              step="0.01"
+              value={editForm.mileage}
+              onChange={(event) => setEditForm({ ...editForm, mileage: event.target.value })}
+            />
+            <label htmlFor="edit-expense">Expense (optional)</label>
+            <input
+              id="edit-expense"
+              type="number"
+              min="0"
+              step="0.01"
+              value={editForm.expense}
+              onChange={(event) => setEditForm({ ...editForm, expense: event.target.value })}
+            />
+            <label htmlFor="edit-description">Description</label>
+            <textarea
+              id="edit-description"
+              maxLength={150}
+              value={editForm.description}
+              onChange={(event) => setEditForm({ ...editForm, description: event.target.value })}
+              required
+            />
+            <button className="entry-submit-btn" type="submit">Save changes</button>
+          </form>
+        </dialog>
+
         <div className="timesheets-title-wrapper">
           <h1 className="timesheets-title">Timesheets</h1>
           <CalendarRange className="timesheets-calendar-icon" />
@@ -264,7 +399,7 @@ export default function Timesheets() {
                 )
                 .reverse()
                 .map((entry, index) => (
-                  <div key={entry.id} className="entry-draft-card">
+                  <div key={entry.id} className="entry-draft-card" onClick={() => openEditModal(entry)}>
                     <div
                       style={{
                         backgroundColor:
@@ -294,8 +429,9 @@ export default function Timesheets() {
                       </div>
                       <button
                       disabled={isGuest}
-                        onClick={async () => {
-                          await handleDeleteEntry([
+                        onClick={async (event) => {
+                           event.stopPropagation();
+                           await handleDeleteEntry([
                             entry.id,
                             entry.company_name,
                             entry.work_date,
@@ -312,7 +448,7 @@ export default function Timesheets() {
             )
           ) : (
             entries.map((entry, index) => (
-              <div key={entry.id} className="entry-draft-card">
+              <div key={entry.id} className="entry-draft-card" onClick={() => openEditModal(entry)}>
                 <div
                   style={{
                     backgroundColor:
@@ -342,7 +478,8 @@ export default function Timesheets() {
                   </div>
                   <button
                   disabled={isGuest}
-                    onClick={async () => {
+                    onClick={async (event) => {
+                      event.stopPropagation();
                       await handleDeleteEntry([
                         entry.id,
                         entry.company_name,
