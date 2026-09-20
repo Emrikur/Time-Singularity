@@ -6,6 +6,16 @@
   width: 100%;
 }
 
+.company-back-link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 90%;
+  margin-bottom: 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
 .company-title-container {
   display: flex;
   align-items: center;

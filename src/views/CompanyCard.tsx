@@ -1,9 +1,10 @@
-import { useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import "../assets/styles/companyCard.css";
 import LayoutWrapper from "../components/LayoutWrapper";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
+import { ArrowLeft } from "lucide-react";
 
 export default function CompanyCard() {
   const location = useLocation();
@@ -44,6 +45,10 @@ export default function CompanyCard() {
   return (
     <LayoutWrapper>
       <section className="company-card-wrapper">
+        <Link className="company-back-link" to="/dashboard">
+          <ArrowLeft size={18} aria-hidden="true" />
+          Back to dashboard
+        </Link>
         <div className="company-title-container">
           <h1 style={{ textAlign: "center" }}>{params.companyname}</h1>
         </div>

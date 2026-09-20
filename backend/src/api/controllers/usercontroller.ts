@@ -1,4 +1,4 @@
-import {queryDraftEntriesByUser, queryupdateAvatar, queryupdatePassword, querydeleteSingleEntry, querySignoff, queryTimesheets } from "../../services/dbCalls";
+import {queryDraftEntriesByUser, queryupdateAvatar, queryupdatePassword, querydeleteSingleEntry, querySignoff, queryTimesheets, queryUpdateDraftEntry } from "../../services/dbCalls";
 
 
 
@@ -60,6 +60,23 @@ const data = await querydeleteSingleEntry(userId,entryID);
 res.json(data)
 
 }
+
+export async function updateUserEntry(req: Request, res: Response) {
+  const userId = req.userId;
+  const { entryId, companyId, date, hours, mileage, expense, description } = req.body;
+
+  const data = await queryUpdateDraftEntry(userId, entryId, {
+    companyId,
+    date,
+    hours,
+    mileage,
+    expense,
+    description,
+  });
+
+  res.json(data);
+}
+
 export async function signoff(req: Request, res: Response) {
   console.log(req.body.signoffMonth)
 const userId = req.userId;

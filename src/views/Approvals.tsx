@@ -301,7 +301,7 @@ export default function Approvals() {
                           display: "flex",
                           flexDirection: "row",
                           alignItems: "center",
-                          justifyContent: "space-evenly",
+                          gap: ".5rem",
                           width: "100%",
                           marginTop: ".5rem",
                           borderTop: "1px solid #ccc",
@@ -310,18 +310,33 @@ export default function Approvals() {
                       >
                         <button
                           className="reject-button"
-                          onClick={async() => {await
-                            handleApproval(timesheet.id, token, "reject");
-                            handleRefresh();
+                          onClick={async() => {
+                            const response = await handleApproval(timesheet.id, token, "reject");
+                            if (response) {
+                              handleRefresh();
+                            }
                           }}
                         >
                           Reject
                         </button>
                         <button
+                          className="edit-button"
+                          onClick={async() => {
+                            const response = await handleApproval(timesheet.id, token, "edit");
+                            if (response) {
+                              handleRefresh();
+                            }
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
                           className="approve-button"
-                          onClick={async() => {await
-                            handleApproval(timesheet.id, token, "approve");
-                            handleRefresh();
+                          onClick={async() => {
+                            const response = await handleApproval(timesheet.id, token, "approve");
+                            if (response) {
+                              handleRefresh();
+                            }
                           }}
                         >
                           Approve

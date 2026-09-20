@@ -266,6 +266,47 @@ export async function querydeleteSingleEntry(userId: string, entryID:string) {
   return "Entry deleted";
 }
 
+export async function queryUpdateDraftEntry(
+  userId: string,
+  entryId: string,
+  entry: {
+    companyId: string;
+    date: string;
+    hours: string;
+    mileage?: string;
+    expense?: string;
+    description: string;
+  },
+) {
+  const response = await pool.query(
+    `UPDATE time_entries
+     SET company_id = $1,
+         work_date = $2,
+         hours_worked = $3,
+         mileage = NULLIF($4, ''),
+         expense = NULLIF($5, ''),
+         description = $6
+     WHERE id = $7 AND user_id = $8 AND status = 'draft'
+     RETURNING id`,
+    [
+      entry.companyId,
+      entry.date,
+      entry.hours,
+      entry.mileage || "",
+      entry.expense || "",
+      entry.description,
+      entryId,
+      userId,
+    ],
+  );
+
+  if (response.rowCount !== 1) {
+    throw new Error("Draft entry not found");
+  }
+
+  return { success: true, message: "Entry updated" };
+}
+
 
 
 //##############################################################################
@@ -377,6 +418,37 @@ export async function querySetTimesheetRejection(timesheetId: string){
 const response =await pool.query("UPDATE timesheets SET status='rejected' WHERE id=$1", [timesheetId])
  await pool.query(`UPDATE time_entries SET status = 'rejected' WHERE timesheet_id = $1`, [timesheetId])
   return response.rows
+}
+
+export async function querySetTimesheetForEdit(timesheetId: string){
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+    const response = await client.query(
+      "UPDATE timesheets SET status='edit' WHERE id=$1 RETURNING id",
+      [timesheetId],
+    );
+
+    if (response.rowCount !== 1) {
+      throw new Error("Timesheet not found");
+    }
+
+    await client.query(
+      `UPDATE time_entries
+       SET status = 'draft', timesheet_id = NULL
+       WHERE timesheet_id = $1`,
+      [timesheetId],
+    );
+
+    await client.query("COMMIT");
+    return response.rows;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 
