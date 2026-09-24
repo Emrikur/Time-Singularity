@@ -1,4 +1,4 @@
-import {queryDraftEntriesByUser, queryupdateAvatar, queryupdatePassword, querydeleteSingleEntry, querySignoff, queryTimesheets, queryUpdateDraftEntry } from "../../services/dbCalls";
+import {queryDraftEntriesByUser, queryupdateAvatar, queryupdatePassword, querydeleteSingleEntry, querySignoff, queryTimesheets, queryUpdateDraftEntry, queryUserTimesheetEntries } from "../../services/dbCalls";
 
 
 
@@ -101,4 +101,10 @@ const data = await queryTimesheets(userId);
 
 res.json(data)
 
+}
+
+export async function getUserTimesheetEntries(req: Request, res: Response) {
+  const data = await queryUserTimesheetEntries(req.userId);
+
+  res.json(data);
 }

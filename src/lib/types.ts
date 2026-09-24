@@ -22,6 +22,7 @@ export interface UserFormData {
 
 export interface EntryTypes{
       id: string;
+      timesheet_id?: string;
       company_id: string;
       company_name: string;
       work_date: string;

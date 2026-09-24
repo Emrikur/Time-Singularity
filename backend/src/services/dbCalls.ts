@@ -376,6 +376,31 @@ const response =await pool.query("SELECT * FROM timesheets WHERE user_id = $1",[
   return response.rows
 }
 
+export async function queryUserTimesheetEntries(userId: string) {
+  const response = await pool.query(
+    `SELECT time_entries.id,
+            time_entries.timesheet_id,
+            time_entries.company_id,
+            companies.name AS company_name,
+            time_entries.work_date,
+            time_entries.hours_worked,
+            time_entries.description,
+            time_entries.mileage,
+            time_entries.expense
+     FROM time_entries
+     JOIN companies ON time_entries.company_id = companies.id
+     JOIN timesheets ON time_entries.timesheet_id = timesheets.id
+     WHERE time_entries.user_id = $1
+       AND timesheets.user_id = $1
+       AND time_entries.timesheet_id IS NOT NULL
+       AND time_entries.status IN ('submitted', 'approved', 'rejected')
+     ORDER BY time_entries.work_date ASC`,
+    [userId],
+  );
+
+  return response.rows;
+}
+
 
 
 //##############################################################################

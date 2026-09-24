@@ -314,6 +314,16 @@ return response
 
     }
 
+export async function fetchUserTimesheetEntries(token: string) {
+  const entries = await axios({
+    method: "get",
+    url: `${import.meta.env.VITE_API_URL}/user/timesheet/entries`,
+    headers: { Authorization: "Bearer " + token },
+  });
+
+  return entries.data;
+}
+
 
 
 //##############################################################################
