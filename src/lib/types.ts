@@ -28,11 +28,11 @@ export interface EntryTypes{
       work_date: string;
       hours_worked: string;
       status:string;
-      mileage:string;
-      expense:string;
+      mileage:string | null;
+      expense:string | null;
       user_id:string;
       user_name:string
-      description:string;
+      description:string | null;
       hourly_rate:string;
 }
 
@@ -48,4 +48,5 @@ export interface TimesheetTypes{
       user_avatar:string;
       work_date:string;
       submitted_at:string
+      approved_at?:string | null;
 }
