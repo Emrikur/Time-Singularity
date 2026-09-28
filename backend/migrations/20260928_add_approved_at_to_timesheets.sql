@@ -1,0 +1,2 @@
+ALTER TABLE timesheets
+ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ;
