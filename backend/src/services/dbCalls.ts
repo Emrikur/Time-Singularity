@@ -371,13 +371,7 @@ await client.query(`UPDATE time_entries
 
 export async function queryTimesheets(userId:string){
 
-const response = await pool.query(
-  `SELECT timesheets.*, users.full_name AS user_name
-   FROM timesheets
-   JOIN users ON timesheets.user_id = users.id
-   WHERE timesheets.user_id = $1`,
-  [userId],
-);
+const response =await pool.query("SELECT * FROM timesheets WHERE user_id = $1",[userId])
 
   return response.rows
 }
@@ -386,21 +380,16 @@ export async function queryUserTimesheetEntries(userId: string) {
   const response = await pool.query(
     `SELECT time_entries.id,
             time_entries.timesheet_id,
-    time_entries.user_id,
-    time_entries.company_id,
-    companies.name AS company_name,
-    time_entries.work_date,
-    time_entries.hours_worked,
-    time_entries.status,
-    time_entries.description,
-    time_entries.mileage,
-    time_entries.expense,
-    users.hourly_rate,
-    users.full_name AS user_name
+            time_entries.company_id,
+            companies.name AS company_name,
+            time_entries.work_date,
+            time_entries.hours_worked,
+            time_entries.description,
+            time_entries.mileage,
+            time_entries.expense
      FROM time_entries
      JOIN companies ON time_entries.company_id = companies.id
      JOIN timesheets ON time_entries.timesheet_id = timesheets.id
-     JOIN users ON time_entries.user_id = users.id
      WHERE time_entries.user_id = $1
        AND timesheets.user_id = $1
        AND time_entries.timesheet_id IS NOT NULL
@@ -441,34 +430,12 @@ export async function queryAdminEntries(){
 }
 
 export async function querySetTimesheetApproval(timesheetId: string){
-  const client = await pool.connect();
 
-  try {
-    await client.query("BEGIN");
-    const response = await client.query(
-      `UPDATE timesheets
-       SET status = 'approved', approved_at = COALESCE(approved_at, NOW())
-       WHERE id = $1
-       RETURNING id`,
-      [timesheetId],
-    );
+  const response =await pool.query("UPDATE timesheets SET status='approved' WHERE id=$1", [timesheetId])
+  await pool.query(`UPDATE time_entries SET status = 'approved' WHERE timesheet_id = $1`, [timesheetId])
 
-    if (response.rowCount !== 1) {
-      throw new Error("Timesheet not found");
-    }
 
-    await client.query(
-      "UPDATE time_entries SET status = 'approved' WHERE timesheet_id = $1",
-      [timesheetId],
-    );
-    await client.query("COMMIT");
-    return response.rows;
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
+  return response.rows
 }
 
 export async function querySetTimesheetRejection(timesheetId: string){
