@@ -53,11 +53,13 @@ const userId = req.userId;
 const {entryID} = req.body;
 // console.log("THE USER ID: ",userId, "THE ENTRY ID: ",entryID)
 
-const data = await querydeleteSingleEntry(userId,entryID);
-
-
-
-res.json(data)
+  try {
+    const data = await querydeleteSingleEntry(userId,entryID);
+    res.json(data)
+  } catch (error) {
+    console.error("Error deleting entry: ", error);
+    res.status(400).json({ success: false, message: "Could not delete entry" });
+  }
 
 }
 
@@ -65,16 +67,21 @@ export async function updateUserEntry(req: Request, res: Response) {
   const userId = req.userId;
   const { entryId, companyId, date, hours, mileage, expense, description } = req.body;
 
-  const data = await queryUpdateDraftEntry(userId, entryId, {
-    companyId,
-    date,
-    hours,
-    mileage,
-    expense,
-    description,
-  });
+  try {
+    const data = await queryUpdateDraftEntry(userId, entryId, {
+      companyId,
+      date,
+      hours,
+      mileage,
+      expense,
+      description,
+    });
 
-  res.json(data);
+    res.json(data);
+  } catch (error) {
+    console.error("Error updating entry: ", error);
+    res.status(400).json({ success: false, message: "Could not update entry" });
+  }
 }
 
 export async function signoff(req: Request, res: Response) {

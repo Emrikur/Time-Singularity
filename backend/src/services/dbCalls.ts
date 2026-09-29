@@ -210,7 +210,7 @@ export async function TimesheetHoursByMonth(userId: string, filter:string) {
 // Hämtar de månader där det finns en draft
 export async function queryTimesheetMonthByName(userId: string) {
  const response = await pool.query(
-    `SELECT DISTINCT DATE_TRUNC('month', work_date) as month
+    `SELECT DISTINCT DATE_TRUNC('month', work_date)::date as month
       FROM time_entries
       WHERE user_id = $1
       AND status = 'draft'
@@ -253,14 +253,49 @@ export async function queryTimesheetEntriesByMonth(userId: string, date:string) 
 
 
 export async function querydeleteSingleEntry(userId: string, entryID:string) {
- console.log("USER ID IN DBCALLS: ",userId, "ENTRY ID IN DBCALLS: ",entryID)
-  await pool.query(
-    `DELETE FROM time_entries WHERE id=$1 AND user_id=$2`,
-  [entryID, userId]
+  const client = await pool.connect();
 
-  );
-  // console.log("Response.rows: ", response.rows)
-  return "Entry deleted";
+  try {
+    await client.query("BEGIN");
+
+    // Only drafts can be deleted; submitted and approved entries belong to a timesheet
+    const deleted = await client.query(
+      `DELETE FROM time_entries
+       WHERE id = $1 AND user_id = $2 AND status = 'draft'
+       RETURNING work_date`,
+      [entryID, userId],
+    );
+
+    if (deleted.rowCount === 1) {
+      // A timesheet sent back for edit has its entries as drafts. When the last one
+      // is deleted there is nothing left to resubmit, so remove the empty timesheet
+      await client.query(
+        `DELETE FROM timesheets
+         WHERE user_id = $1
+           AND status = 'edit'
+           AND DATE_TRUNC('month', month) = DATE_TRUNC('month', $2::DATE)
+           AND NOT EXISTS (
+             SELECT 1 FROM time_entries
+             WHERE time_entries.user_id = $1
+               AND time_entries.status = 'draft'
+               AND DATE_TRUNC('month', time_entries.work_date) = DATE_TRUNC('month', $2::DATE)
+           )
+           AND NOT EXISTS (
+             SELECT 1 FROM time_entries
+             WHERE time_entries.timesheet_id = timesheets.id
+           )`,
+        [userId, deleted.rows[0].work_date],
+      );
+    }
+
+    await client.query("COMMIT");
+    return "Entry deleted";
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 export async function queryUpdateDraftEntry(
@@ -280,8 +315,8 @@ export async function queryUpdateDraftEntry(
      SET company_id = $1,
          work_date = $2,
          hours_worked = $3,
-         mileage = NULLIF($4, ''),
-         expense = NULLIF($5, ''),
+         mileage = NULLIF($4, '')::numeric,
+         expense = NULLIF($5, '')::numeric,
          description = $6
      WHERE id = $7 AND user_id = $8 AND status = 'draft'
      RETURNING id`,
@@ -317,11 +352,14 @@ export async function querySignoff(userId: string, month:string) {
 try{
 await client.query("BEGIN");
 
+// Reuse a pending timesheet, or one that was sent back for edit, for the same month
 const exisitingTimesheet = await client.query(
     `SELECT id FROM timesheets
      WHERE user_id = $1
-     AND status = 'pending'
-     AND DATE_TRUNC('month', month) = DATE_TRUNC('month', $2::DATE)`,
+     AND status IN ('pending', 'edit')
+     AND DATE_TRUNC('month', month) = DATE_TRUNC('month', $2::DATE)
+     ORDER BY (status = 'edit') DESC
+     LIMIT 1`,
     [userId, month]
   );
 
@@ -329,6 +367,14 @@ const exisitingTimesheet = await client.query(
 
   if(exisitingTimesheet.rows.length > 0){
     timesheetId = exisitingTimesheet.rows[0].id
+
+    // A resubmitted edit goes back into the admin's pending queue
+    await client.query(
+      `UPDATE timesheets
+       SET status = 'pending', submitted_at = NOW()
+       WHERE id = $1 AND status = 'edit'`,
+      [timesheetId]
+    );
   }else {
 
     const newTimesheet = await client.query(
@@ -368,7 +414,13 @@ await client.query(`UPDATE time_entries
 
 export async function queryTimesheets(userId:string){
 
-const response =await pool.query("SELECT * FROM timesheets WHERE user_id = $1",[userId])
+const response = await pool.query(
+  `SELECT timesheets.*, users.full_name AS user_name
+   FROM timesheets
+   JOIN users ON timesheets.user_id = users.id
+   WHERE timesheets.user_id = $1`,
+  [userId],
+);
 
   return response.rows
 }
@@ -383,10 +435,12 @@ export async function queryUserTimesheetEntries(userId: string) {
             time_entries.hours_worked,
             time_entries.description,
             time_entries.mileage,
-            time_entries.expense
+            time_entries.expense,
+            users.hourly_rate
      FROM time_entries
      JOIN companies ON time_entries.company_id = companies.id
      JOIN timesheets ON time_entries.timesheet_id = timesheets.id
+     JOIN users ON time_entries.user_id = users.id
      WHERE time_entries.user_id = $1
        AND timesheets.user_id = $1
        AND time_entries.timesheet_id IS NOT NULL
@@ -428,11 +482,34 @@ export async function queryAdminEntries(){
 
 export async function querySetTimesheetApproval(timesheetId: string){
 
-  const response =await pool.query("UPDATE timesheets SET status='approved' WHERE id=$1", [timesheetId])
-  await pool.query(`UPDATE time_entries SET status = 'approved' WHERE timesheet_id = $1`, [timesheetId])
+  const client = await pool.connect();
 
+  try {
+    await client.query("BEGIN");
+    const response = await client.query(
+      `UPDATE timesheets
+       SET status = 'approved', approved_at = COALESCE(approved_at, NOW())
+       WHERE id = $1
+       RETURNING id`,
+      [timesheetId],
+    );
 
-  return response.rows
+    if (response.rowCount !== 1) {
+      throw new Error("Timesheet not found");
+    }
+
+    await client.query(
+      "UPDATE time_entries SET status = 'approved' WHERE timesheet_id = $1",
+      [timesheetId],
+    );
+    await client.query("COMMIT");
+    return response.rows;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 export async function querySetTimesheetRejection(timesheetId: string){

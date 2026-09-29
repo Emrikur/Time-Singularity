@@ -15,8 +15,35 @@ interface GraphEntry{
 
 //##############################################################################
 
+// Date-only strings ("2026-09-15") are parsed as local midnight instead of UTC,
+// so they don't shift to the previous day in timezones behind UTC
+export function toLocalDate(dateTime: string | Date) {
+  if (typeof dateTime === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateTime)) {
+    const [year, month, day] = dateTime.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+  return new Date(dateTime);
+}
+
+
+
+//##############################################################################
+
+// Today's date as "YYYY-MM-DD" in the user's timezone. toISOString() uses UTC,
+// which is still yesterday between 00:00 and 02:00 Swedish time
+export function todayLocalISO() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+
+
+//##############################################################################
+
 export function formatEventDateTime(dateTime: string | Date, option?:Intl.DateTimeFormatOptions) {
-const dateObj = new Date(dateTime)
+const dateObj = toLocalDate(dateTime)
 
   if(!option){
     return dateObj.toLocaleDateString("en-US", {
@@ -36,7 +63,7 @@ return dateObj.toLocaleDateString("en-US", option) /* lägga till önskad format
 
 
 export function formatWeekTime(dateTime: string | Date) {
-  const date = new Date(dateTime);
+  const date = toLocalDate(dateTime);
   const dateStr = date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -54,7 +81,7 @@ export function formatWeekTime(dateTime: string | Date) {
 
 export function formatEventDateDayTime(dateTime: string | Date) {
 
-  const date = new Date(dateTime);
+  const date = toLocalDate(dateTime);
   const dateStr = date.toLocaleDateString("en-US", {
     weekday: "short",
   });
@@ -71,10 +98,10 @@ export function formatGraphData(responseData: GraphEntry[], filter:Filter): Char
 
   if (filter === "year") {
     const sortedData = [...responseData].sort(
-      (a, b) => new Date(a.work_date).getTime() - new Date(b.work_date).getTime()
+      (a, b) => toLocalDate(a.work_date).getTime() - toLocalDate(b.work_date).getTime()
     );
     const months = [...new Set(sortedData.map((entry) =>
-      new Date(entry.work_date).toLocaleString("en-US", { month: "long" })
+      toLocalDate(entry.work_date).toLocaleString("en-US", { month: "long" })
     ))];
 
 
@@ -84,7 +111,7 @@ export function formatGraphData(responseData: GraphEntry[], filter:Filter): Char
       label: "Hours",
       data: months.map((month) =>
         responseData
-          .filter((e) => new Date(e.work_date).toLocaleString("en-US", { month: "long" }) === month)
+          .filter((e) => toLocalDate(e.work_date).toLocaleString("en-US", { month: "long" }) === month)
           .reduce((sum, e) => sum + Number(e.hours_worked), 0)
       ),
       backgroundColor: "rgba(53, 162, 235, 0.5)",
@@ -94,7 +121,7 @@ export function formatGraphData(responseData: GraphEntry[], filter:Filter): Char
 
 const companies = [...new Set(responseData.reverse().map((company) => company.company_name))]
 
-const dates = [...new Set(responseData.map((entry) => entry.work_date))].sort((a,b) => new Date(a).getTime() - new Date(b).getTime())
+const dates = [...new Set(responseData.map((entry) => entry.work_date))].sort((a,b) => toLocalDate(a).getTime() - toLocalDate(b).getTime())
 
   const formattedDates = dates.map((date) =>
     filter === "week" ? formatEventDateDayTime(date):

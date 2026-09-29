@@ -48,4 +48,5 @@ export interface TimesheetTypes{
       user_avatar:string;
       work_date:string;
       submitted_at:string
+      approved_at?:string | null;
 }
