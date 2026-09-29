@@ -3,7 +3,6 @@ import LayoutWrapper from "../components/LayoutWrapper";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { LogOut, X, RectangleEllipsis } from "lucide-react";
-import CreateHashPassword from "../components/CreateHashPassword";
 import ChangePasswordForm from '../components/ChangePasswordForm';
 
 
@@ -71,7 +70,6 @@ export default function Settings() {
             ></label>
           </div>
         </div> */}
-        {/* <CreateHashPassword/> */}
         <div className='settings-btn-wrapper'>
           <div className='default-Btn'>
           <button

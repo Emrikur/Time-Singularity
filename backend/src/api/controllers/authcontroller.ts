@@ -41,9 +41,7 @@ export const login = async (req: Request, res: Response<LoginResponse>) => {
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [
       email.toLocaleLowerCase(),
     ]);
-    console.log(req.body);
     const user = result.rows[0];
-    console.log("Found user: ", user);
 
     if (!DB_URL) {
       console.error("Database url is not set in the env-file");

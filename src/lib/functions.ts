@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import type { ChartData } from "chart.js";
 import type { Filter } from "./types";
 import axios from "axios";
@@ -15,23 +14,6 @@ interface GraphEntry{
 
 
 //##############################################################################
-
-//! Create Hash-function
-
-export async function createHash(password: string) {
-  if(password.length < 20){
-    const newHash = await bcrypt.hash(`${password}`, 10);
-    return newHash;
-  }else{
-    return "Password too long"
-  }
-}
-
-
-
-//##############################################################################
-
-
 
 export function formatEventDateTime(dateTime: string | Date, option?:Intl.DateTimeFormatOptions) {
 const dateObj = new Date(dateTime)
@@ -407,11 +389,10 @@ return response
       // console.log("Timesheet ID: ", timesheetId, "Action: ", action, "Token: ", token)
        const response = await axios({
           method: "put",
-          url: `${import.meta.env.VITE_API_URL}/user/timesheet/history`,
+          url: `${import.meta.env.VITE_API_URL}/admin/timesheet/approval`,
           headers: { Authorization: `Bearer ${token}` },
           data:{timesheetId, action}
         })
-console.log("Response from handleApproval: ", response)
         return response;
 
       } else {

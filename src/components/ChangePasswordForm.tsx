@@ -17,7 +17,6 @@ const isGuest = email === "guest@ts.com";
     setSuccessMsg("")
     event.preventDefault();
     const form = event.currentTarget;
-    console.log( form["new-password"].value, form["confirm-password"].value, form["current-password"].value);
 
     const newPassword = form["new-password"].value;
     const confirmPassword = form["confirm-password"].value;

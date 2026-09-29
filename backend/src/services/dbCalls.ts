@@ -110,8 +110,6 @@ export async function queryaddNewEntry(userId: string, EntryFormData: EntryFormD
 
 export async function queryupdatePassword(userId: string, currentPassword: string, newPassword: string) {
 
-  console.log("the current password in DBCALLS: ",currentPassword,"The new password in DBCALLS: ", newPassword)
-
 
   try {
     const response = await pool.query(
@@ -119,7 +117,6 @@ export async function queryupdatePassword(userId: string, currentPassword: strin
       [userId]);
 
 const validatePassword = await bcrypt.compare(currentPassword, response.rows[0].password_hash);
-console.log("validate password: ", validatePassword)
 
       if (!validatePassword) {
 
