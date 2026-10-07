@@ -1,4 +1,4 @@
-import {queryAddNewUser, queryEmailExists, queryAdminEntries, queryAdminTS, querySubmittedEntries, querySetTimesheetApproval, querySetTimesheetRejection, querySetTimesheetForEdit, queryAllCompanies, queryAssignUserCompanies} from "../../services/dbCalls"
+import {queryAddNewUser, queryEmailExists, queryAdminTS, querySubmittedEntries, querySetTimesheetApproval, querySetTimesheetRejection, querySetTimesheetForEdit, queryAllCompanies, queryAssignUserCompanies} from "../../services/dbCalls"
 import { ALLOWED_ROLES, isEmail, isUuid, isValidPassword, parseNumberInRange } from "../validation";
 import { Request, Response } from "express";
 
@@ -21,20 +21,6 @@ try {
 
 
 //##############################################################################
-
-
-//GET ALL ENTRIES
-
-export async function getPendingEntries(req:Request, res:Response){
-const data = await queryAdminEntries()
-
-res.json(data)
-}
-
-
-
-//##############################################################################
-
 
 
 export async function getSubmittedEntries(req:Request, res:Response){

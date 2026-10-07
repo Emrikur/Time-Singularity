@@ -42,10 +42,6 @@ async function handleFormSubmit(e:React.FormEvent<HTMLFormElement>){
     return;
 
   }
-    console.log("hours value ",form.hours.value)
-    console.log("company value ",form.company.value)
-    console.log("description value ",form.description.value)
-    console.log("date value ",form.date.value)
 
       // console.log( form.username.value, form.password.value);
       const addEntry = await toast.promise(axios({
@@ -70,7 +66,6 @@ if(!token){
 }
       if (addEntry.data.success) {
         const response = addEntry.data;
-        console.log("Response message ",response.message)
         setFormResponse(response)
         setTimeout(() => {
           setFormResponse(null)
@@ -83,8 +78,7 @@ if(!token){
         setWordCounter(0)
 
       } else {
-        const response = addEntry.data.data;
-        console.log("Response message ",response.message)
+        const response = addEntry.data;
         setFormResponse(response)
         setTimeout(() => {
           setFormResponse(null)

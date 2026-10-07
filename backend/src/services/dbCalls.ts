@@ -29,8 +29,8 @@ export async function queryGraphData(userId: string, filter: string) {
       return response.rows;
 
   }catch(err){
-    console.log(err)
-    return console.log(err)
+    console.error("Error fetching graph data: ", err)
+    throw err
   }
 
 }
@@ -236,21 +236,6 @@ ORDER BY time_entries.work_date ASC`
 
 
 
-export async function TimesheetHoursByMonth(userId: string, filter:string) {
- const response = await pool.query(
-    `SELECT worked_hours FROM time_entries WHERE user_id = $1 AND status = 'draft' AND DATE_TRUNC('month', work_date) = DATE_TRUNC('month', $2::DATE)`,
-    [userId, filter]
-
-  );
-  return response.rows;
-}
-
-
-
-//##############################################################################
-
-
-
 // Hämtar de månader där det finns en draft
 export async function queryTimesheetMonthByName(userId: string) {
  const response = await pool.query(
@@ -262,7 +247,6 @@ export async function queryTimesheetMonthByName(userId: string) {
     [userId]
 
   );
-  console.log(response.rows)
   return response.rows;
 }
 
@@ -273,9 +257,6 @@ export async function queryTimesheetMonthByName(userId: string) {
 
 
 export async function queryTimesheetEntriesByMonth(userId: string, date:string) {
-  const formatDate = date.split("-")
-  const formattedDate = formatDate[0]+"-"+formatDate[1]
-  console.log(formattedDate)
   const response = await pool.query(
     `SELECT time_entries.*, companies.name AS company_name
    FROM time_entries
@@ -286,7 +267,6 @@ export async function queryTimesheetEntriesByMonth(userId: string, date:string) 
   [userId, date]
 
   );
-  console.log("Response.rows: ", response.rows)
   return response.rows;
 }
 
@@ -360,7 +340,6 @@ export async function queryUpdateDraftEntry(
 
 export async function querySignoff(userId: string, month:string) {
   const client = await pool.connect()
- console.log("USER ID IN DBCALLS: ",userId, "ENTRY ID IN DBCALLS: ",month)
 
 try{
 await client.query("BEGIN");
@@ -477,13 +456,6 @@ const response =await pool.query(`
 
 
 
-
-export async function queryAdminEntries(){
-
-// const response =await pool.query("SELECT * FROM timesheets WHERE status='pending'")
-
-  // return response.rows
-}
 
 export async function querySetTimesheetApproval(timesheetId: string){
   const client = await pool.connect();

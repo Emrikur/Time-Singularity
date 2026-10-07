@@ -61,7 +61,6 @@ export default function Approvals() {
   ];
   const avatarURL = "../avatars/";
   const uniqueUsers = new Set(timesheets.map((user) => user.user_id)).size;
-  console.log("Number of users: ", uniqueUsers);
   const sumofTimesheets = timesheets.length;
 
   // console.log("Sum of timesheets: ", sumofTimesheets);
