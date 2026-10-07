@@ -1,4 +1,5 @@
 import pool from "../db";
+import type { PoolClient } from "pg";
 import type { EntryFormData } from "../../types/types";
 import bcrypt from "bcrypt";
 
@@ -28,8 +29,8 @@ export async function queryGraphData(userId: string, filter: string) {
       return response.rows;
 
   }catch(err){
-    console.log(err)
-    return console.log(err)
+    console.error("Error fetching graph data: ", err)
+    throw err
   }
 
 }
@@ -40,9 +41,30 @@ export async function queryGraphData(userId: string, filter: string) {
 
 
 
-export async function queryCompanyData() {
-  const response = await pool.query(`SELECT name, id, is_active FROM companies`);
-  // console.log("RESPONSE ROWS: ",response.rows)
+// Returnerar endast företag som användaren är tilldelad via user_companies
+export async function queryCompanyData(userId: string) {
+  const response = await pool.query(
+    `SELECT companies.name, companies.id, companies.is_active
+     FROM companies
+     JOIN user_companies ON user_companies.company_id = companies.id
+     WHERE user_companies.user_id = $1
+     ORDER BY companies.name ASC`,
+    [userId],
+  );
+  return response.rows;
+}
+
+
+
+//##############################################################################
+
+
+
+// Admin: alla företag, används vid tilldelning av företag till ny användare
+export async function queryAllCompanies() {
+  const response = await pool.query(
+    `SELECT name, id, is_active FROM companies ORDER BY name ASC`,
+  );
   return response.rows;
 }
 
@@ -65,11 +87,17 @@ export async function queryCompanyHours(userId: string) {
 
 
 
-export async function querySpecificCompanyData(companyId: string) {
-  console.log("REQUEST ID IN DBCALLS: ",companyId)
+// Returnerar endast företaget om det är tilldelat användaren
+export async function querySpecificCompanyData(companyId: string, userId: string) {
   try {
-    const response = await pool.query(`SELECT * FROM companies WHERE id = $1`, [companyId]);
-    console.log("RESPONSE ROWS: ",response.rows)
+    const response = await pool.query(
+      `SELECT companies.*
+       FROM companies
+       JOIN user_companies ON user_companies.company_id = companies.id
+       WHERE companies.id = $1
+       AND user_companies.user_id = $2`,
+      [companyId, userId],
+    );
     return response.rows;
   } catch (error) {
     console.error("Error fetching specific company data: ", error);
@@ -83,9 +111,22 @@ export async function querySpecificCompanyData(companyId: string) {
 
 
 
+// Kontrollerar att företaget är tilldelat användaren via user_companies
+export async function queryUserHasCompany(userId: string, companyId: string) {
+  const response = await pool.query(
+    `SELECT 1 FROM user_companies WHERE user_id = $1 AND company_id = $2`,
+    [userId, companyId],
+  );
+  return response.rowCount === 1;
+}
+
+
+
+//##############################################################################
+
+
+
 export async function queryaddNewEntry(userId: string, EntryFormData: EntryFormData) {
-  console.log("User id: ", userId);
-  console.log("Form data: ", EntryFormData);
 
         await pool.query(
          `INSERT INTO time_entries (user_id, company_id, work_date, hours_worked, description) VALUES ($1, $2, $3, $4, $5)`,
@@ -110,11 +151,14 @@ export async function queryaddNewEntry(userId: string, EntryFormData: EntryFormD
 
 export async function queryupdatePassword(userId: string, currentPassword: string, newPassword: string) {
 
-
   try {
     const response = await pool.query(
       `SELECT password_hash FROM users WHERE id = $1`,
       [userId]);
+
+if (response.rowCount !== 1) {
+  return { success: false, message: "User not found" };
+}
 
 const validatePassword = await bcrypt.compare(currentPassword, response.rows[0].password_hash);
 
@@ -192,21 +236,6 @@ ORDER BY time_entries.work_date ASC`
 
 
 
-export async function TimesheetHoursByMonth(userId: string, filter:string) {
- const response = await pool.query(
-    `SELECT worked_hours FROM time_entries WHERE user_id = $1 AND status = 'draft' AND DATE_TRUNC('month', work_date) = DATE_TRUNC('month', $2::DATE)`,
-    [userId, filter]
-
-  );
-  return response.rows;
-}
-
-
-
-//##############################################################################
-
-
-
 // Hämtar de månader där det finns en draft
 export async function queryTimesheetMonthByName(userId: string) {
  const response = await pool.query(
@@ -218,7 +247,6 @@ export async function queryTimesheetMonthByName(userId: string) {
     [userId]
 
   );
-  console.log(response.rows)
   return response.rows;
 }
 
@@ -229,9 +257,6 @@ export async function queryTimesheetMonthByName(userId: string) {
 
 
 export async function queryTimesheetEntriesByMonth(userId: string, date:string) {
-  const formatDate = date.split("-")
-  const formattedDate = formatDate[0]+"-"+formatDate[1]
-  console.log(formattedDate)
   const response = await pool.query(
     `SELECT time_entries.*, companies.name AS company_name
    FROM time_entries
@@ -242,7 +267,6 @@ export async function queryTimesheetEntriesByMonth(userId: string, date:string) 
   [userId, date]
 
   );
-  console.log("Response.rows: ", response.rows)
   return response.rows;
 }
 
@@ -266,27 +290,30 @@ export async function querydeleteSingleEntry(userId: string, entryID:string) {
       [entryID, userId],
     );
 
-    if (deleted.rowCount === 1) {
-      // A timesheet sent back for edit has its entries as drafts. When the last one
-      // is deleted there is nothing left to resubmit, so remove the empty timesheet
-      await client.query(
-        `DELETE FROM timesheets
-         WHERE user_id = $1
-           AND status = 'edit'
-           AND DATE_TRUNC('month', month) = DATE_TRUNC('month', $2::DATE)
-           AND NOT EXISTS (
-             SELECT 1 FROM time_entries
-             WHERE time_entries.user_id = $1
-               AND time_entries.status = 'draft'
-               AND DATE_TRUNC('month', time_entries.work_date) = DATE_TRUNC('month', $2::DATE)
-           )
-           AND NOT EXISTS (
-             SELECT 1 FROM time_entries
-             WHERE time_entries.timesheet_id = timesheets.id
-           )`,
-        [userId, deleted.rows[0].work_date],
-      );
+    // Inget raderat = entry finns inte, tillhör någon annan eller är inte ett utkast
+    if (deleted.rowCount !== 1) {
+      throw new Error("Draft entry not found");
     }
+
+    // A timesheet sent back for edit has its entries as drafts. When the last one
+    // is deleted there is nothing left to resubmit, so remove the empty timesheet
+    await client.query(
+      `DELETE FROM timesheets
+       WHERE user_id = $1
+         AND status = 'edit'
+         AND DATE_TRUNC('month', month) = DATE_TRUNC('month', $2::DATE)
+         AND NOT EXISTS (
+           SELECT 1 FROM time_entries
+           WHERE time_entries.user_id = $1
+             AND time_entries.status = 'draft'
+             AND DATE_TRUNC('month', time_entries.work_date) = DATE_TRUNC('month', $2::DATE)
+         )
+         AND NOT EXISTS (
+           SELECT 1 FROM time_entries
+           WHERE time_entries.timesheet_id = timesheets.id
+         )`,
+      [userId, deleted.rows[0].work_date],
+    );
 
     await client.query("COMMIT");
     return "Entry deleted";
@@ -347,7 +374,6 @@ export async function queryUpdateDraftEntry(
 
 export async function querySignoff(userId: string, month:string) {
   const client = await pool.connect()
- console.log("USER ID IN DBCALLS: ",userId, "ENTRY ID IN DBCALLS: ",month)
 
 try{
 await client.query("BEGIN");
@@ -473,13 +499,6 @@ const response =await pool.query(`
 
 
 
-export async function queryAdminEntries(){
-
-// const response =await pool.query("SELECT * FROM timesheets WHERE status='pending'")
-
-  // return response.rows
-}
-
 export async function querySetTimesheetApproval(timesheetId: string){
 
   const client = await pool.connect();
@@ -513,10 +532,31 @@ export async function querySetTimesheetApproval(timesheetId: string){
 }
 
 export async function querySetTimesheetRejection(timesheetId: string){
+  const client = await pool.connect();
 
-const response =await pool.query("UPDATE timesheets SET status='rejected' WHERE id=$1", [timesheetId])
- await pool.query(`UPDATE time_entries SET status = 'rejected' WHERE timesheet_id = $1`, [timesheetId])
-  return response.rows
+  try {
+    await client.query("BEGIN");
+    const response = await client.query(
+      "UPDATE timesheets SET status='rejected' WHERE id=$1 RETURNING id",
+      [timesheetId],
+    );
+
+    if (response.rowCount !== 1) {
+      throw new Error("Timesheet not found");
+    }
+
+    await client.query(
+      `UPDATE time_entries SET status = 'rejected' WHERE timesheet_id = $1`,
+      [timesheetId],
+    );
+    await client.query("COMMIT");
+    return response.rows;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 export async function querySetTimesheetForEdit(timesheetId: string){
@@ -551,21 +591,102 @@ export async function querySetTimesheetForEdit(timesheetId: string){
 }
 
 
-export async function getAllUsers(){
+export async function queryEmailExists(email: string){
 
-  const response = await pool.query("SELECT * FROM users")
-  return response.rows
+  const response = await pool.query(
+    "SELECT 1 FROM users WHERE LOWER(email) = LOWER($1)",
+    [email],
+  )
+  return response.rowCount === 1
 }
 
-export async function queryAddNewUser(fullName:string, email:string, password:string, role:string, salary:string, status:string){
+
+
+//##############################################################################
+
+
+
+// Endast befintliga företag infogas, och redan tilldelade hoppas över.
+// Tar emot en client så att den kan köras inuti en pågående transaktion.
+async function insertUserCompanies(client: PoolClient, userId: string, companyIds: string[]) {
+  const response = await client.query(
+    `INSERT INTO user_companies (user_id, company_id)
+     SELECT $1, companies.id
+     FROM companies
+     WHERE companies.id = ANY($2::uuid[])
+     AND NOT EXISTS (
+       SELECT 1 FROM user_companies
+       WHERE user_companies.user_id = $1
+       AND user_companies.company_id = companies.id
+     )
+     ON CONFLICT DO NOTHING
+     RETURNING company_id`,
+    [userId, companyIds],
+  );
+  return response.rowCount;
+}
+
+
+
+//##############################################################################
+
+
+
+// Skapar användaren och tilldelar företag i samma transaktion
+export async function queryAddNewUser(fullName:string, email:string, password:string, role:string, salary:number, status:boolean, companyIds: string[] = []){
 
 const hashedPassword = await bcrypt.hash(password, 10);
+const client = await pool.connect();
 
-const response = await pool.query(
-  `INSERT INTO users (full_name, email, password_hash, role, hourly_rate, is_active) VALUES ($1, $2, $3, $4, $5, $6)`,
-  [fullName, email, hashedPassword, role, salary, status]
-);
+try {
+  await client.query("BEGIN");
 
-return response.rows;
+  const response = await client.query(
+    `INSERT INTO users (full_name, email, password_hash, role, hourly_rate, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+    [fullName, email, hashedPassword, role, salary, status]
+  );
+  const userId = response.rows[0].id;
 
+  if (companyIds.length > 0) {
+    await insertUserCompanies(client, userId, companyIds);
+  }
+
+  await client.query("COMMIT");
+  return userId;
+} catch (error) {
+  await client.query("ROLLBACK");
+  throw error;
+} finally {
+  client.release();
+}
+
+}
+
+
+
+//##############################################################################
+
+
+
+export async function queryAssignUserCompanies(userId: string, companyIds: string[]) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const userExists = await client.query(`SELECT id FROM users WHERE id = $1`, [userId]);
+    if (userExists.rowCount !== 1) {
+      throw new Error("User not found");
+    }
+
+    const assigned = await insertUserCompanies(client, userId, companyIds);
+
+    await client.query("COMMIT");
+    return { success: true, message: "Companies assigned", assigned };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }

@@ -16,12 +16,13 @@ const authMiddleware = (req:Request, res:Response, next:NextFunction ) => {
       if(!secret){
         return res.status(500).json({error:"JWT secret not correctly configured"})
       }
-      const decoded = jwt.verify(token, secret) as unknown as {userId:string, role:string}
+      const decoded = jwt.verify(token, secret) as unknown as {userId:string, role:string, email:string}
       if(typeof decoded === "string" || !decoded){
         return res.status(401).json({error:"Invalid token"})
       }
       req.userId = decoded.userId
       req.userRole = decoded.role
+      req.userEmail = decoded.email
       next();
     }
     catch (err) {

@@ -64,7 +64,6 @@ const isGuest = email === "guest@ts.com";
           setTimeout(() => {
             setSuccessMsg("")
           }, 3000);
-          console.log("Password changed successfully!");
           (document.getElementById("new-password") as HTMLInputElement).value = "";
           (document.getElementById("confirm-password") as HTMLInputElement).value = "";
           (document.getElementById("current-password") as HTMLInputElement).value = "";

@@ -26,15 +26,17 @@ export default function CompanyCard() {
 
   useEffect(() => {
     async function fetchCompanyData() {
-      const response = await axios({
-        method: "get",
-        url: `${import.meta.env.VITE_API_URL}/company/user/${id}`,
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      try {
+        const response = await axios({
+          method: "get",
+          url: `${import.meta.env.VITE_API_URL}/company/user/${id}`,
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      // console.log("Company data: ", response.data);
-
-      setCompanyResponse(response.data[0]);
+        setCompanyResponse(response.data[0]);
+      } catch (error) {
+        console.error("Could not load company", error);
+      }
     }
     fetchCompanyData();
     // console.log("Company response: ", companyResponse);

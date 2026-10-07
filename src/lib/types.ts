@@ -36,6 +36,12 @@ export interface EntryTypes{
       hourly_rate:string;
 }
 
+export interface CompanyTypes{
+      id:string;
+      name:string;
+      is_active:boolean;
+}
+
 export interface MonthTypes{
       month:string
 }

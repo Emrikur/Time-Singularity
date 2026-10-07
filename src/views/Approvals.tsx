@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../assets/styles/timesheet.css";
-// import { toast } from "react-toastify";
+import { toast } from "react-toastify";
+import axios from "axios";
 import LayoutWrapper from "../components/LayoutWrapper";
 import {
   ClipboardCheck,
@@ -18,7 +19,6 @@ import {
 } from "../lib/functions";
 import type { EntryTypes, TimesheetTypes } from "../lib/types";
 import { useAuth } from "../hooks/useAuth";
-import { toast } from "react-toastify";
 export default function Approvals() {
 
   const { token } = useAuth();
@@ -61,7 +61,6 @@ export default function Approvals() {
   ];
   const avatarURL = "../avatars/";
   const uniqueUsers = new Set(timesheets.map((user) => user.user_id)).size;
-  console.log("Number of users: ", uniqueUsers);
   const sumofTimesheets = timesheets.length;
 
   // console.log("Sum of timesheets: ", sumofTimesheets);
@@ -71,14 +70,27 @@ export default function Approvals() {
     setRefresh(!refresh);
   }
 
+  // Fångar fel från approve/reject/edit så att knappen inte kastar ett ohanterat fel
+  async function runApproval(timesheetId: string, action: "approve" | "reject" | "edit") {
+    try {
+      return await handleApproval(timesheetId, token, action);
+    } catch (error) {
+      console.error("Could not update timesheet", error);
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        toast.error(error.response.data.message);
+      }
+      return null;
+    }
+  }
+
   useEffect(() => {
     fetchAdminTimesheets(token).then((response) => {
       setTimesheets(response);
-    });
+    }).catch((error) => console.error("Could not load timesheets", error));
 
     fetchSubmittedEntries(token).then((response) => {
       setEntries(response);
-    });
+    }).catch((error) => console.error("Could not load entries", error));
   }, [refresh,token]);
 
   return (
@@ -312,7 +324,7 @@ export default function Approvals() {
                         <button
                           className="reject-button"
                           onClick={async() => {
-                            const response = await handleApproval(timesheet.id, token, "reject");
+                            const response = await runApproval(timesheet.id, "reject");
                             if (response) {
                               handleRefresh();
                             }
@@ -322,16 +334,11 @@ export default function Approvals() {
                         </button>
                         <button
                           className="edit-button"
-                          onClick={async () => {
-                            try {
-                              const response = await handleApproval(timesheet.id, token, "edit");
-                              if (response) {
-                                toast.success("Timesheet returned for editing");
-                                handleRefresh();
-                              }
-                            } catch (error) {
-                              toast.error("Could not return timesheet for editing");
-                              console.error("Failed to return timesheet for editing", error);
+                          onClick={async() => {
+                            const response = await runApproval(timesheet.id, "edit");
+                            if (response) {
+                              toast.success("Timesheet returned for editing");
+                              handleRefresh();
                             }
                           }}
                         >
@@ -340,7 +347,7 @@ export default function Approvals() {
                         <button
                           className="approve-button"
                           onClick={async() => {
-                            const response = await handleApproval(timesheet.id, token, "approve");
+                            const response = await runApproval(timesheet.id, "approve");
                             if (response) {
                               handleRefresh();
                             }

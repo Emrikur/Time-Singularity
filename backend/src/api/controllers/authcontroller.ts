@@ -13,6 +13,10 @@ interface Request {
     userId: string;
   };
 }
+
+// bcrypt-hash av ett slumpat värde, används när e-posten inte finns
+const DUMMY_HASH = "$2b$10$CwTycUXWue0Thq9StjUM0uJ8.Ah3x8V0dHcQkY1t3dIXX0tGgG1Ce";
+
 type LoginResponse =
   | {
       success: true;
@@ -36,68 +40,68 @@ export const login = async (req: Request, res: Response<LoginResponse>) => {
   const { email, password } = req.body;
   const DB_URL = env.DATABASE_URL;
 
+  if (!DB_URL || !env.JWT_SECRET) {
+    console.error("Database url or JWT secret is not set in the env-file");
+    return res
+      .status(500)
+      .json({ success: false, message: "Server configuration error" });
+  }
+
+  // Validera innan något används, så att saknade fält inte kraschar servern
+  if (
+    typeof email !== "string" ||
+    typeof password !== "string" ||
+    email.trim() === "" ||
+    password.trim() === ""
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "email and password are required",
+    });
+  }
+
   try {
     //Get user which match with email and check if it validates
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-      email.toLocaleLowerCase(),
+      email.trim().toLowerCase(),
     ]);
     const user = result.rows[0];
 
-    if (!DB_URL) {
-      console.error("Database url is not set in the env-file");
+    // Jämför alltid mot en hash så att svarstiden inte avslöjar om e-posten finns
+    const passwordIsValid = await bcrypt.compare(
+      password,
+      user ? user.password_hash : DUMMY_HASH,
+    );
+
+    // Samma generiska meddelande oavsett om e-posten eller lösenordet är fel
+    if (!user || !passwordIsValid) {
       return res
-        .status(500)
-        .json({ success: false, message: "Server configuration error" });
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
     }
 
-    if (!email || !password || email.trim() === "" || password.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "email and password are required",
-      });
-    }
-
-    try {
-      if (!user) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Invalid email or password" });
-      }
-      const passwordIsValid = await bcrypt.compare(password, user.password_hash);
-
-      if (!passwordIsValid) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Invalid credentials" });
-      }
-
-      const token = jwt.sign(
-        {
-          userId: user.id,
-          email: user.email,
-          full_name: user.full_name,
-          role: user.role,
-          avatar: user.avatar
-        },
-        env.JWT_SECRET!,
-        { expiresIn: "12h" },
-      );
-      console.log("Here is the user role: ", user.role);
-      res.json({
-        token: token,
-        message: `Hello ${user.full_name}, redirecting`,
-        full_name: user.full_name,
-        success: true,
+    const token = jwt.sign(
+      {
+        userId: user.id,
         email: user.email,
+        full_name: user.full_name,
         role: user.role,
-        avatar: user.avatar,
-      });
-    } catch (err) {
-      console.log("Database call failed:", err);
-      res.json({success:false, message:""})
-    }
+        avatar: user.avatar
+      },
+      env.JWT_SECRET,
+      { expiresIn: "12h" },
+    );
+    res.json({
+      token: token,
+      message: `Hello ${user.full_name}, redirecting`,
+      full_name: user.full_name,
+      success: true,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+    });
   } catch (err) {
-    console.error("DB error: ", err);
+    console.error("Login failed: ", err);
     res
       .status(500)
       .json({ success: false, message: "Failed to connect to API" });
@@ -119,8 +123,6 @@ export const logout = (req: Request, res: Response) => {
       message: "email is required for logout",
     });
   } else {
-    console.log("Logout request received", req.body);
-
     //TODO: Clear session data and tokens on logout
 
     res.json({

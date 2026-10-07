@@ -110,18 +110,27 @@ export default function Timesheets() {
         return;
       }
 
-        await deleteEntry(entryID, token).then((response) => {
-          toast.success(response.message);
-        });
+      try {
+        const response = await deleteEntry(entryID, token);
+        toast.success(response.message);
+      } catch (error) {
+        console.error("Could not delete entry", error);
+        // 403/500 visas redan av axios-interceptorn
+        if (axios.isAxiosError(error) && error.response?.status === 400) {
+          toast.error(error.response.data.message);
+        }
+      }
 
     }
   }
 
   async function handleSignoff() {
-    await signoffTimesheet(selectedOption, token).then((response) => {
+    try {
+      const response = await signoffTimesheet(selectedOption, token);
       toast.success(response.message);
-      return;
-    });
+    } catch (error) {
+      console.error("Could not sign off timesheet", error);
+    }
   }
 
   function handleRefresh() {
@@ -163,6 +172,7 @@ export default function Timesheets() {
       closeEditModal();
       handleRefresh();
     } catch (error) {
+      console.error("Could not update entry", error);
       if (axios.isAxiosError(error) && error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
@@ -182,31 +192,35 @@ export default function Timesheets() {
       if (response.length > 0) {
         setSelectedOptions(response[0].month);
       }
-    });
+    }).catch((error) => console.error("Could not load months", error));
 
 
     fetchTimesheets(token).then((response) => {
       setTimesheets(response);
-    });
+    }).catch((error) => console.error("Could not load timesheets", error));
 
     if (!selectedOption) {
       return;
     }
 
     async function getEntries() {
-      const getEntries = await axios({
-        method: "get",
-        url: `${import.meta.env.VITE_API_URL}/dashboard/allTime/${selectedOption}`,
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if(!token){
-        navigate("/")
-        return;
+      try {
+        const getEntries = await axios({
+          method: "get",
+          url: `${import.meta.env.VITE_API_URL}/dashboard/allTime/${selectedOption}`,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if(!token){
+          navigate("/")
+          return;
+        }
+
+        const response = getEntries.data.data;
+
+        setEntries(response);
+      } catch (error) {
+        console.error("Could not load entries", error);
       }
-
-      const response = getEntries.data.data;
-
-      setEntries(response);
     }
 
     getEntries();
@@ -223,7 +237,7 @@ export default function Timesheets() {
       headers: { Authorization: "Bearer " + token },
     }).then((response) => {
       setCompanies(response.data);
-    });
+    }).catch((error) => console.error("Could not load companies", error));
   }, [token]);
 
   return (
