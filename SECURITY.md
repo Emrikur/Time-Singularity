@@ -41,7 +41,7 @@ All public endpoints must be protected against overload attacks.
 ## Sensitive Data
 - Never log passwords, tokens or sensitive user data to the console
 - Never store passwords in plain text
-- Never expose hourly_rate or salary data to non-admin users
+- Never expose another user's hourly_rate or salary data to non-admin users (users may see their own)
 - Never include sensitive fields in error messages
 
 ## Known Risk Areas

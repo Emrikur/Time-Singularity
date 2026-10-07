@@ -45,8 +45,13 @@ export default function Login() {
         toast(response.message);
       }
     } catch (error) {
-      console.error(error);
-      toast("An error occurred during login");
+      // 400/401/429 skickar ett meddelande från backend, visa det om det finns
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast(error.response.data.message);
+      } else {
+        console.error(error);
+        toast("An error occurred during login");
+      }
     }
   }
 

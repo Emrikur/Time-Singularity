@@ -9,11 +9,15 @@ import modalRoute from "./src/api/routes/modalRoute"
 import adminRoutes from "./src/api/routes/adminRoutes"
 import companyRoute from "./src/api/routes/companyRoute"
 import userRoute from './src/api/routes/userRoute';
+import { writeLimiter } from './src/api/middleware/rateLimiters';
 
 
 // const env = getEnv();
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Render ligger bakom en proxy, utan detta delar alla användare samma IP i rate limitern
+app.set("trust proxy", 1);
 
 app.use(cors({
   origin:
@@ -31,6 +35,7 @@ app.use(cors({
 
 
 app.use(express.json());
+app.use(writeLimiter);
 
 
 
