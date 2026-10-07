@@ -110,18 +110,27 @@ export default function Timesheets() {
         return;
       }
 
-        await deleteEntry(entryID, token).then((response) => {
-          toast.success(response.message);
-        });
+      try {
+        const response = await deleteEntry(entryID, token);
+        toast.success(response.message);
+      } catch (error) {
+        console.error("Could not delete entry", error);
+        // 403/500 visas redan av axios-interceptorn
+        if (axios.isAxiosError(error) && error.response?.status === 400) {
+          toast.error(error.response.data.message);
+        }
+      }
 
     }
   }
 
   async function handleSignoff() {
-    await signoffTimesheet(selectedOption, token).then((response) => {
+    try {
+      const response = await signoffTimesheet(selectedOption, token);
       toast.success(response.message);
-      return;
-    });
+    } catch (error) {
+      console.error("Could not sign off timesheet", error);
+    }
   }
 
   function handleRefresh() {
@@ -152,9 +161,16 @@ export default function Timesheets() {
       return;
     }
 
-    await updateDraftEntry(selectedEntry.id, token, editForm);
-    closeEditModal();
-    handleRefresh();
+    try {
+      await updateDraftEntry(selectedEntry.id, token, editForm);
+      closeEditModal();
+      handleRefresh();
+    } catch (error) {
+      console.error("Could not update entry", error);
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        toast.error(error.response.data.message);
+      }
+    }
   }
 
   useEffect(() => {

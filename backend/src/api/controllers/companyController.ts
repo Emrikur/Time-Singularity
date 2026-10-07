@@ -9,7 +9,8 @@ import {  queryCompanyHours,querySpecificCompanyData } from "../../services/dbCa
 import { Request, Response } from "express";
 
 export async function getCompanies(req: Request, res: Response) {
-  const data = await querySpecificCompanyData(req.params.id);
+  const userId = req.userId;
+  const data = await querySpecificCompanyData(req.params.id, userId);
 
   res.json(data);
 }

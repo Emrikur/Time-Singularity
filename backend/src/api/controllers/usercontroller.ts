@@ -1,4 +1,4 @@
-import {queryDraftEntriesByUser, queryupdateAvatar, queryupdatePassword, querydeleteSingleEntry, querySignoff, queryTimesheets, queryUpdateDraftEntry, queryUserTimesheetEntries } from "../../services/dbCalls";
+import {queryDraftEntriesByUser, queryupdateAvatar, queryupdatePassword, querydeleteSingleEntry, querySignoff, queryTimesheets, queryUpdateDraftEntry, queryUserTimesheetEntries, queryUserHasCompany } from "../../services/dbCalls";
 
 
 
@@ -48,16 +48,19 @@ res.json(data)
 
 }
 export async function deleteUserEntries(req: Request, res: Response) {
-  console.log(req.body.entryID)
 const userId = req.userId;
 const {entryID} = req.body;
-// console.log("THE USER ID: ",userId, "THE ENTRY ID: ",entryID)
 
-const data = await querydeleteSingleEntry(userId,entryID);
-
-
-
-res.json(data)
+try {
+  const data = await querydeleteSingleEntry(userId,entryID);
+  res.json(data)
+} catch (error) {
+  if (error instanceof Error && error.message === "Draft entry not found") {
+    return res.status(400).json({ success: false, message: "Only your own draft entries can be deleted" });
+  }
+  console.error("Error deleting entry: ", error);
+  res.status(500).json({ success: false, message: "Could not delete entry" });
+}
 
 }
 
@@ -65,16 +68,30 @@ export async function updateUserEntry(req: Request, res: Response) {
   const userId = req.userId;
   const { entryId, companyId, date, hours, mileage, expense, description } = req.body;
 
-  const data = await queryUpdateDraftEntry(userId, entryId, {
-    companyId,
-    date,
-    hours,
-    mileage,
-    expense,
-    description,
-  });
+  try {
+    // Användaren får bara flytta en entry till ett företag den är tilldelad
+    const hasCompany = await queryUserHasCompany(userId, companyId);
+    if (!hasCompany) {
+      return res.status(403).json({ success: false, message: "Company not assigned to user" });
+    }
 
-  res.json(data);
+    const data = await queryUpdateDraftEntry(userId, entryId, {
+      companyId,
+      date,
+      hours,
+      mileage,
+      expense,
+      description,
+    });
+
+    res.json(data);
+  } catch (error) {
+    if (error instanceof Error && error.message === "Draft entry not found") {
+      return res.status(400).json({ success: false, message: "Only your own draft entries can be edited" });
+    }
+    console.error("Error updating entry: ", error);
+    res.status(500).json({ success: false, message: "Could not update entry" });
+  }
 }
 
 export async function signoff(req: Request, res: Response) {

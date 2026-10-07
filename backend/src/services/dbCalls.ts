@@ -86,11 +86,17 @@ export async function queryCompanyHours(userId: string) {
 
 
 
-export async function querySpecificCompanyData(companyId: string) {
-  console.log("REQUEST ID IN DBCALLS: ",companyId)
+// Returnerar endast företaget om det är tilldelat användaren
+export async function querySpecificCompanyData(companyId: string, userId: string) {
   try {
-    const response = await pool.query(`SELECT * FROM companies WHERE id = $1`, [companyId]);
-    console.log("RESPONSE ROWS: ",response.rows)
+    const response = await pool.query(
+      `SELECT companies.*
+       FROM companies
+       JOIN user_companies ON user_companies.company_id = companies.id
+       WHERE companies.id = $1
+       AND user_companies.user_id = $2`,
+      [companyId, userId],
+    );
     return response.rows;
   } catch (error) {
     console.error("Error fetching specific company data: ", error);
@@ -104,9 +110,22 @@ export async function querySpecificCompanyData(companyId: string) {
 
 
 
+// Kontrollerar att företaget är tilldelat användaren via user_companies
+export async function queryUserHasCompany(userId: string, companyId: string) {
+  const response = await pool.query(
+    `SELECT 1 FROM user_companies WHERE user_id = $1 AND company_id = $2`,
+    [userId, companyId],
+  );
+  return response.rowCount === 1;
+}
+
+
+
+//##############################################################################
+
+
+
 export async function queryaddNewEntry(userId: string, EntryFormData: EntryFormData) {
-  console.log("User id: ", userId);
-  console.log("Form data: ", EntryFormData);
 
         await pool.query(
          `INSERT INTO time_entries (user_id, company_id, work_date, hours_worked, description) VALUES ($1, $2, $3, $4, $5)`,
@@ -273,13 +292,17 @@ export async function queryTimesheetEntriesByMonth(userId: string, date:string) 
 
 
 export async function querydeleteSingleEntry(userId: string, entryID:string) {
- console.log("USER ID IN DBCALLS: ",userId, "ENTRY ID IN DBCALLS: ",entryID)
-  await pool.query(
-    `DELETE FROM time_entries WHERE id=$1 AND user_id=$2`,
+  // Endast egna utkast får tas bort, inskickade/godkända entries är låsta
+  const response = await pool.query(
+    `DELETE FROM time_entries WHERE id=$1 AND user_id=$2 AND status = 'draft'`,
   [entryID, userId]
 
   );
-  // console.log("Response.rows: ", response.rows)
+
+  if (response.rowCount !== 1) {
+    throw new Error("Draft entry not found");
+  }
+
   return "Entry deleted";
 }
 
