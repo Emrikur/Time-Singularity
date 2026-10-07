@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import type { ChartData } from "chart.js";
 import type { Filter } from "./types";
 import axios from "axios";
@@ -10,21 +9,6 @@ interface GraphEntry{
   hours_worked:string,
   work_date:string,
   filter:string
-}
-
-
-
-//##############################################################################
-
-//! Create Hash-function
-
-export async function createHash(password: string) {
-  if(password.length < 20){
-    const newHash = await bcrypt.hash(`${password}`, 10);
-    return newHash;
-  }else{
-    return "Password too long"
-  }
 }
 
 
