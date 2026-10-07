@@ -67,7 +67,9 @@ async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     password: formData.password.value,
     role: formData.role.value,
     salary: formData.salary.value,
-    status: userStatus
+    status: userStatus,
+    // Användaren och företagen skapas i samma transaktion på backend
+    companyIds: selectedCompanyIds
   };
 
 try {
@@ -82,29 +84,18 @@ try {
     return;
   }
 
-  // Tilldelar valda företag till den nya användaren
-  if (selectedCompanyIds.length > 0) {
-    try {
-      await axios({
-        method: "post",
-        url: `${import.meta.env.VITE_API_URL}/admin/user/${response.data.userId}/companies`,
-        headers: { Authorization: `Bearer ${token}` },
-        data: { companyIds: selectedCompanyIds }
-      });
-    } catch (error) {
-      console.error("Could not assign companies", error);
-      toast.error("User created, but companies could not be assigned");
-      return;
-    }
-  }
-
   toast.success(response.data.message)
   // Töm formuläret efter att användare skapats
   formData.reset();
   setSelectedCompanyIds([]);
 } catch (error) {
   console.error("Could not create user", error);
-  toast.error("Could not create user");
+  // Valideringsfel (400) skickar ett meddelande från backend
+  if (axios.isAxiosError(error) && error.response?.status === 400) {
+    toast.error(error.response.data.message);
+  } else {
+    toast.error("Could not create user");
+  }
 }
 }
 

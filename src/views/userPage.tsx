@@ -39,16 +39,19 @@ export default function UserPage() {
   useEffect(() => {
 
     async function fetchUserHours() {
-      const response = await axios(`${import.meta.env.VITE_API_URL}/company/total-hours`, {
-        method:"get",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      })
-      // console.log("User hours response: ", response.data);
-      const hoursArray = response.data.map((entry: { hours_worked: string }) => entry.hours_worked);
-      const totalHours = hoursArray.reduce((acc: string, hours: string) => acc + Number(hours), 0);
-      setTotalHours(totalHours);
+      try {
+        const response = await axios(`${import.meta.env.VITE_API_URL}/company/total-hours`, {
+          method:"get",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        })
+        const hoursArray = response.data.map((entry: { hours_worked: string }) => entry.hours_worked);
+        const totalHours = hoursArray.reduce((acc: string, hours: string) => acc + Number(hours), 0);
+        setTotalHours(totalHours);
+      } catch (error) {
+        console.error("Could not load total hours", error);
+      }
     // console.log("Total hours: ", hoursArray);
 }
 fetchUserHours()
@@ -63,21 +66,21 @@ useEffect(()=> {
 
 
     if(avatarImg){
-     await axios({
-        method: "put",
-        url: `${import.meta.env.VITE_API_URL}/user/avatar`,
-        headers: { Authorization: `Bearer ${token}`},
-        data:{
-          avatarURL:avatarImg
-        }
+      try {
+        await axios({
+          method: "put",
+          url: `${import.meta.env.VITE_API_URL}/user/avatar`,
+          headers: { Authorization: `Bearer ${token}`},
+          data:{
+            avatarURL:avatarImg
+          }
+        });
 
+        //update in context and sessionStorage
+        updateAvatar(avatarImg)
+      } catch (error) {
+        console.error("Could not update avatar", error);
       }
-    );
-
-    //update in context and sessionStorage
-    updateAvatar(avatarImg)
-
-
   }
 }
 

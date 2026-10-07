@@ -1,5 +1,6 @@
 import { queryGraphData, queryTimesheetEntriesByMonth, queryTimesheetMonthByName } from "../../services/dbCalls";
 import { Request, Response } from "express";
+import { isValidDate } from "../validation";
 
 
 
@@ -10,36 +11,18 @@ export async function getGraphsData(req: Request, res: Response) {
   const allowedFilter = ["week", "month", "year"];
   type Filter = "week" | "month" | "year";
   if (!allowedFilter.includes(req.params.filterCat)) {
-    return res.status(401).send("Invalid Filter");
+    return res.status(400).send("Invalid Filter");
   }
   const userId = req.userId;
   const filter = req.params.filterCat as Filter;
 
-  const data = await queryGraphData(userId, filter);
-
-  res.json({ data });
-}
-
-
-
-//##############################################################################
-
-
-
-export async function getGraphsWeekData(req: Request, res: Response) {
-  const allowedFilter = ["week"];
-  type Filter = "week";
-  if (!allowedFilter.includes(req.params.filterCat)) {
-    return res.status(401).send("Invalid Filter");
+  try {
+    const data = await queryGraphData(userId, filter);
+    res.json({ data });
+  } catch (error) {
+    console.error("Error fetching graph data: ", error);
+    res.status(500).json({ success: false, message: "Could not fetch graph data" });
   }
-  // console.log("FROM GRAPHCONTROLLER ",req.userId, " and ", req.params.filterCat)
-  const userId = req.userId;
-  const filter = req.params.filterCat as Filter;
-
-  const data = await queryGraphData(userId, filter);
-
-  // console.log("Here is data: ", data)
-  res.json({ data });
 }
 
 
@@ -53,12 +36,17 @@ export async function getAllTimeData(req: Request, res: Response) {
   const userId = req.userId;
   const filter = req.params.filterCategory;
 
-  console.log("user Id from graphcontroller:", userId, "Filter category in graphcontroller: ", filter)
+  if (!isValidDate(filter)) {
+    return res.status(400).json({ success: false, message: "Invalid month" });
+  }
 
-  const data = await queryTimesheetEntriesByMonth(userId, filter);
-
-  console.log("Det gick bra: ", req.params.filterCategory)
-  res.json({ data });
+  try {
+    const data = await queryTimesheetEntriesByMonth(userId, filter);
+    res.json({ data });
+  } catch (error) {
+    console.error("Error fetching entries by month: ", error);
+    res.status(500).json({ success: false, message: "Could not fetch entries" });
+  }
 }
 
 
@@ -68,8 +56,11 @@ export async function getdraftMonths(req: Request, res: Response) {
 
   const userId = req.userId;
 
-  const data = await queryTimesheetMonthByName(userId);
-
-  console.log("Here is data: ", data)
-  res.json({ data });
+  try {
+    const data = await queryTimesheetMonthByName(userId);
+    res.json({ data });
+  } catch (error) {
+    console.error("Error fetching draft months: ", error);
+    res.status(500).json({ success: false, message: "Could not fetch months" });
+  }
 }

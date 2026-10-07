@@ -184,31 +184,35 @@ export default function Timesheets() {
       if (response.length > 0) {
         setSelectedOptions(response[0].month);
       }
-    });
+    }).catch((error) => console.error("Could not load months", error));
 
 
     fetchTimesheets(token).then((response) => {
       setTimesheets(response);
-    });
+    }).catch((error) => console.error("Could not load timesheets", error));
 
     if (!selectedOption) {
       return;
     }
 
     async function getEntries() {
-      const getEntries = await axios({
-        method: "get",
-        url: `${import.meta.env.VITE_API_URL}/dashboard/allTime/${selectedOption}`,
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if(!token){
-        navigate("/")
-        return;
+      try {
+        const getEntries = await axios({
+          method: "get",
+          url: `${import.meta.env.VITE_API_URL}/dashboard/allTime/${selectedOption}`,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if(!token){
+          navigate("/")
+          return;
+        }
+
+        const response = getEntries.data.data;
+
+        setEntries(response);
+      } catch (error) {
+        console.error("Could not load entries", error);
       }
-
-      const response = getEntries.data.data;
-
-      setEntries(response);
     }
 
     getEntries();
@@ -225,7 +229,7 @@ export default function Timesheets() {
       headers: { Authorization: "Bearer " + token },
     }).then((response) => {
       setCompanies(response.data);
-    });
+    }).catch((error) => console.error("Could not load companies", error));
   }, [token]);
 
   return (
