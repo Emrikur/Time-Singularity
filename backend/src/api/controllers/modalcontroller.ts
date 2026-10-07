@@ -8,7 +8,8 @@ import { Request, Response } from "express";
 
 
 export async function getCompanies(req:Request, res:Response){
-const data = await queryCompanyData()
+const userId = req.userId
+const data = await queryCompanyData(userId)
 
 // console.log("Here is data: ", data)
 res.json(data)

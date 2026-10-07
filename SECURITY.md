@@ -30,6 +30,7 @@ All public endpoints must be protected against overload attacks.
 - Wrap multi-step operations in transactions (BEGIN/COMMIT/ROLLBACK)
 - Users should never be able to access other users data (always filter by userId)
 - Admin-only data must be protected by role check on the backend
+- New junction tables must have appropriate UNIQUE constraints to prevent duplicates
 
 ## Role Based Access
 - Never trust the frontend for role validation
@@ -48,3 +49,30 @@ All public endpoints must be protected against overload attacks.
 - Timesheet signoff → validate that entries belong to the requesting user
 - Admin approval → verify admin role on every request
 - File uploads (future) → validate file type and size
+- Company assignments → users must only see and log hours for their assigned companies
+
+## Pre-deployment Checklist
+Before considering any feature complete, verify the following:
+
+### Authentication & Authorization
+- [ ] All new endpoints have authMiddleware applied
+- [ ] Admin-only endpoints have isAdmin middleware applied
+- [ ] userId is always sourced from req.userId (token), never from req.body or req.params
+- [ ] Role checks are performed on the backend, never trusted from the frontend
+
+### Database
+- [ ] All queries use parameterized queries ($1, $2), no string concatenation
+- [ ] Multi-step operations are wrapped in transactions (BEGIN/COMMIT/ROLLBACK)
+- [ ] Data is always filtered by userId to prevent users accessing other users data
+- [ ] New junction tables have appropriate UNIQUE constraints to prevent duplicates
+
+### API
+- [ ] New routes are registered in server.ts
+- [ ] Route paths in frontend axios calls exactly match backend route definitions
+- [ ] CORS is configured to allow the frontend origin
+- [ ] Input validation is performed before hitting the database
+
+### Frontend
+- [ ] Guest user restrictions are in place for destructive actions
+- [ ] Error handling is implemented for all axios calls
+- [ ] No sensitive data (tokens, passwords, hourly rates) is logged to the console

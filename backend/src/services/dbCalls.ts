@@ -40,9 +40,30 @@ export async function queryGraphData(userId: string, filter: string) {
 
 
 
-export async function queryCompanyData() {
-  const response = await pool.query(`SELECT name, id, is_active FROM companies`);
-  // console.log("RESPONSE ROWS: ",response.rows)
+// Returnerar endast företag som användaren är tilldelad via user_companies
+export async function queryCompanyData(userId: string) {
+  const response = await pool.query(
+    `SELECT companies.name, companies.id, companies.is_active
+     FROM companies
+     JOIN user_companies ON user_companies.company_id = companies.id
+     WHERE user_companies.user_id = $1
+     ORDER BY companies.name ASC`,
+    [userId],
+  );
+  return response.rows;
+}
+
+
+
+//##############################################################################
+
+
+
+// Admin: alla företag, används vid tilldelning av företag till ny användare
+export async function queryAllCompanies() {
+  const response = await pool.query(
+    `SELECT name, id, is_active FROM companies ORDER BY name ASC`,
+  );
   return response.rows;
 }
 
@@ -521,10 +542,53 @@ export async function queryAddNewUser(fullName:string, email:string, password:st
 const hashedPassword = await bcrypt.hash(password, 10);
 
 const response = await pool.query(
-  `INSERT INTO users (full_name, email, password_hash, role, hourly_rate, is_active) VALUES ($1, $2, $3, $4, $5, $6)`,
+  `INSERT INTO users (full_name, email, password_hash, role, hourly_rate, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
   [fullName, email, hashedPassword, role, salary, status]
 );
 
 return response.rows;
 
+}
+
+
+
+//##############################################################################
+
+
+
+export async function queryAssignUserCompanies(userId: string, companyIds: string[]) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const userExists = await client.query(`SELECT id FROM users WHERE id = $1`, [userId]);
+    if (userExists.rowCount !== 1) {
+      throw new Error("User not found");
+    }
+
+    // Endast befintliga företag infogas, och redan tilldelade hoppas över
+    const response = await client.query(
+      `INSERT INTO user_companies (user_id, company_id)
+       SELECT $1, companies.id
+       FROM companies
+       WHERE companies.id = ANY($2::uuid[])
+       AND NOT EXISTS (
+         SELECT 1 FROM user_companies
+         WHERE user_companies.user_id = $1
+         AND user_companies.company_id = companies.id
+       )
+       ON CONFLICT DO NOTHING
+       RETURNING company_id`,
+      [userId, companyIds],
+    );
+
+    await client.query("COMMIT");
+    return { success: true, message: "Companies assigned", assigned: response.rowCount };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
