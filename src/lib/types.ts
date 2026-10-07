@@ -28,11 +28,11 @@ export interface EntryTypes{
       work_date: string;
       hours_worked: string;
       status:string;
-      mileage:string | null;
-      expense:string | null;
+      mileage:string;
+      expense:string;
       user_id:string;
       user_name:string
-      description:string | null;
+      description:string;
       hourly_rate:string;
 }
 

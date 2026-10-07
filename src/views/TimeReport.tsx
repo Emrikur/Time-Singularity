@@ -7,6 +7,7 @@ import {CirclePlus, ClockPlus} from "lucide-react"
 import type { EntryFormData } from "../lib/types";
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
+import { todayLocalISO } from "../lib/functions";
 
 
 
@@ -37,6 +38,10 @@ async function handleFormSubmit(e:React.FormEvent<HTMLFormElement>){
       toast.error("Description can't exceed 150 characters")
       return
     }
+    if (new Date(form.date.value) > new Date()) {
+  toast.error("You can't log hours for future dates!");
+  return;
+}
   if(Number(form.hours.value) > 24){
     toast.error("May only log a maximum of 24 hours")
     return;
@@ -115,33 +120,64 @@ if(!token){
   return (
     <>
     <LayoutWrapper>
-      <form className="form" onSubmit={handleFormSubmit}>
-        <select className="company-select" name="company">
-          {dbResponse ? dbResponse.filter((company) => company.is_active).map((company) => <option className="form-option" value={company.id} key={company.id}>{company.name}</option>): null}
-        </select>
-        <div className="date-wrapper">
-          <input
-          max={new Date().toISOString().split('T')[0]}
-          onClick={(e) => e.currentTarget.showPicker()}
-          className="input-date" name="date"  type="date" />
+      <section className="time-report">
+      <h1 className="report-title">Time report</h1>
+      <form className="report-form" onSubmit={handleFormSubmit}>
+        <div className="report-field report-company">
+          <label htmlFor="report-company">Company</label>
+          <select id="report-company" className="report-input" name="company" required>
+            {dbResponse ? dbResponse.filter((company) => company.is_active).map((company) => <option className="form-option" value={company.id} key={company.id}>{company.name}</option>): null}
+          </select>
         </div>
 
-
-          <div className="hours">
-            <input name="hours" placeholder="Hours" className="hours-input" type="text" />
-            <ClockPlus className="hours-icon" size={20}/>
+        <div className="report-when">
+          <div className="report-field report-date">
+            <label htmlFor="report-date">Date</label>
+            <input
+            id="report-date"
+            max={todayLocalISO()}
+            defaultValue={todayLocalISO()}
+            onClick={(e) => e.currentTarget.showPicker?.()}
+            className="report-input" name="date" type="date" required />
           </div>
 
-
-        <div className="description-wrapper">
-          <label htmlFor="description">Description</label>
-          <textarea onChange={(e) => setWordCounter(e.currentTarget.value.length)} name="description" id="textarea"/>
-          <p className={wordcounter > 150 ? "word-count-exceeded" : "word-count"}>{wordcounter}/150</p>
+          <div className="report-field report-hours">
+            <label htmlFor="report-hours">Hours</label>
+            <div className="report-hours-input">
+              <input
+                id="report-hours"
+                name="hours"
+                placeholder="0"
+                className="report-input"
+                type="number"
+                inputMode="decimal"
+                min="0.01"
+                max="24"
+                step="0.01"
+                required
+              />
+              <ClockPlus className="report-hours-icon" size={20} aria-hidden="true"/>
+            </div>
+          </div>
         </div>
 
-        {formResponse ? <p className={formResponse.success ? "success-message" : "failed-message"}>{formResponse.message}</p> : <button disabled={isGuest} className="default-Btn" id="logHoursBtn" type="submit"><CirclePlus/><p>Log hrs</p> </button>}
+        <div className="report-field report-description">
+          <label htmlFor="report-description-input">Description</label>
+          <textarea
+            id="report-description-input"
+            className="report-input"
+            onChange={(e) => setWordCounter(e.currentTarget.value.length)}
+            name="description"
+          />
+          <p className={wordcounter > 150 ? "report-counter exceeded" : "report-counter"}>{wordcounter}/150</p>
+        </div>
+
+        <div className="report-submit">
+          {formResponse ? <p className={formResponse.success ? "report-message success" : "report-message failed"}>{formResponse.message}</p> : <button disabled={isGuest} className="default-Btn" id="logHoursBtn" type="submit"><CirclePlus/><p>Log hrs</p> </button>}
+        </div>
 
       </form>
+      </section>
       </LayoutWrapper>
     </>
   );
