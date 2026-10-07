@@ -58,4 +58,27 @@
       font-size: 12px;
     }
 }
+
+.company-assignment {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 0 0 .75rem 0;
+
+  .company-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+
+    input {
+      height: auto;
+    }
+  }
+}
 }

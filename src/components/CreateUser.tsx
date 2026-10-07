@@ -1,11 +1,41 @@
 import "../assets/styles/createUser.css";
 // import type UserFormData from "../lib/types";
+import type { CompanyTypes } from "../lib/types";
 import { useAuth } from "../hooks/useAuth";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { useEffect, useState } from "react";
 export default function CreateUser() {
 
   const { token } = useAuth();
+  const [companies, setCompanies] = useState<CompanyTypes[]>([]);
+  const [selectedCompanyIds, setSelectedCompanyIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchAllCompanies() {
+      try {
+        const response = await axios({
+          method: "get",
+          url: `${import.meta.env.VITE_API_URL}/admin/companies/fetch`,
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCompanies(response.data);
+      } catch (error) {
+        console.error("Could not fetch companies", error);
+        toast.error("Could not load companies");
+      }
+    }
+
+    fetchAllCompanies();
+  }, [token]);
+
+  function toggleCompany(companyId: string) {
+    setSelectedCompanyIds((prev) =>
+      prev.includes(companyId)
+        ? prev.filter((id) => id !== companyId)
+        : [...prev, companyId]
+    );
+  }
 
 async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 
@@ -22,7 +52,6 @@ async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
   };
 // Konverterar statusvärdet från string till boolean
   const userStatus = formData.status.value === "true" ? true : false;
-  console.log("Form data: ", formData.firstName.value);
 
   const fullName =
   formData.firstName.value.charAt(0).toUpperCase() +
@@ -38,25 +67,35 @@ async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     password: formData.password.value,
     role: formData.role.value,
     salary: formData.salary.value,
-    status: userStatus
+    status: userStatus,
+    // Användaren och företagen skapas i samma transaktion på backend
+    companyIds: selectedCompanyIds
   };
-  console.log("User data to be sent to backend: ", userData);
 
-const response = await axios({
-  method: "post",
-  url: `${import.meta.env.VITE_API_URL}/admin/user/create`,
-  headers: { Authorization: `Bearer ${token}` },
-  data: userData});
+try {
+  const response = await axios({
+    method: "post",
+    url: `${import.meta.env.VITE_API_URL}/admin/user/create`,
+    headers: { Authorization: `Bearer ${token}` },
+    data: userData});
 
-console.log("Response from backend: ", response.data.success);
-console.log("Response message from backend: ", response.data.message);
+  if(response.data.success === false){
+    toast.error(response.data.message)
+    return;
+  }
 
-if(response.data.success){
   toast.success(response.data.message)
   // Töm formuläret efter att användare skapats
   formData.reset();
-}else if(response.data.success === false){
-  toast.error(response.data.message)
+  setSelectedCompanyIds([]);
+} catch (error) {
+  console.error("Could not create user", error);
+  // Valideringsfel (400) skickar ett meddelande från backend
+  if (axios.isAxiosError(error) && error.response?.status === 400) {
+    toast.error(error.response.data.message);
+  } else {
+    toast.error("Could not create user");
+  }
 }
 }
 
@@ -84,6 +123,21 @@ if(response.data.success){
           <option value="true">Active</option>
           <option value="false">Inactive</option>
         </select>
+        <fieldset className="company-assignment">
+          <legend>Assigned companies:</legend>
+          {/* Inaktiva företag visas inte i listan */}
+          {companies.filter((company) => company.is_active).map((company) => (
+            <label key={company.id} className="company-option">
+              <input
+                type="checkbox"
+                value={company.id}
+                checked={selectedCompanyIds.includes(company.id)}
+                onChange={() => toggleCompany(company.id)}
+              />
+              {company.name}
+            </label>
+          ))}
+        </fieldset>
         <button className="default-Btn" type="submit">Create User</button>
       </form>
     </div>

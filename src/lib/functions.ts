@@ -378,76 +378,35 @@ return response
     }
 
 
-    export async function handleApproval(timesheetId:string, token:string | null, action:"approve" | "reject" | "edit") {
+const APPROVAL_CONFIRM_TEXT = {
+  approve: "Are you sure you want to approve this timesheet?",
+  reject: "Are you sure you want to reject this timesheet?",
+  edit: "Are you sure you want to send this timesheet back for editing?",
+};
 
-      if (!token) {
-        throw new Error("No token provided");
-      }
-      if (!timesheetId) {
-        throw new Error("No timesheet ID provided");
-      }
-      if (action !== "approve" && action !== "reject" && action !== "edit") {
-        throw new Error("Invalid action provided");
-      }
-      if (action === "approve") {
-        if (!window.confirm("Are you sure you want to approve this timesheet?")) {
-          console.log("Approval cancelled by user");
-          return;
-        }
+export async function handleApproval(timesheetId:string, token:string | null, action:"approve" | "reject" | "edit") {
 
-      // console.log("Timesheet ID: ", timesheetId, "Action: ", action, "Token: ", token)
-             const response = await axios({
-                method: "put",
-                url: `${import.meta.env.VITE_API_URL}/admin/timesheet/approval`,
-                headers: { Authorization: `Bearer ${token}` },
-                data:{timesheetId, action}
-              })
+  if (!token) {
+    throw new Error("No token provided");
+  }
+  if (!timesheetId) {
+    throw new Error("No timesheet ID provided");
+  }
+  if (action !== "approve" && action !== "reject" && action !== "edit") {
+    throw new Error("Invalid action provided");
+  }
 
-              return response;
+  if (!window.confirm(APPROVAL_CONFIRM_TEXT[action])) {
+    return;
+  }
 
+  // Alla tre åtgärder går till samma admin-endpoint
+  const response = await axios({
+    method: "put",
+    url: `${import.meta.env.VITE_API_URL}/admin/timesheet/approval`,
+    headers: { Authorization: `Bearer ${token}` },
+    data: { timesheetId, action },
+  });
 
-
-      }else if (action === "reject") {
-        if (!window.confirm("Are you sure you want to reject this timesheet?")) {
-          console.log("Rejection cancelled by user");
-          return;
-        }
-
-      // console.log("Timesheet ID: ", timesheetId, "Action: ", action, "Token: ", token)
-       const response = await axios({
-          method: "put",
-          url: `${import.meta.env.VITE_API_URL}/admin/timesheet/approval`,
-          headers: { Authorization: `Bearer ${token}` },
-          data:{timesheetId, action}
-        })
-        return response;
-
-      } else {
-if (!window.confirm("Are you sure you want to send this timesheet back for editing?")) {
-  console.log("Edit request cancelled by user");
-  return;
+  return response;
 }
-
-const response = await axios({
-  method: "put",
-  url: `${import.meta.env.VITE_API_URL}/admin/timesheet/approval`,
-  headers: { Authorization: "Bearer " + token },
-  data: { timesheetId, action },
-});
-
-return response;
-      }
-    }
-
-    /* export async function  fetchPastTimesheets(token:string){
-
-      console.log("The token", token)
-      const response = await axios({
-        method:"get",
-        url:`${import.meta.env.VITE_API_URL}/user/timesheet/history`,
-        headers:{ Authorization: `Bearer ${token}`},
-      })
-      return response
-
-
-    } */
