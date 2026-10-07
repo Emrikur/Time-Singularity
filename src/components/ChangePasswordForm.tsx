@@ -17,7 +17,6 @@ const isGuest = email === "guest@ts.com";
     setSuccessMsg("")
     event.preventDefault();
     const form = event.currentTarget;
-    console.log( form["new-password"].value, form["confirm-password"].value, form["current-password"].value);
 
     const newPassword = form["new-password"].value;
     const confirmPassword = form["confirm-password"].value;
@@ -65,7 +64,6 @@ const isGuest = email === "guest@ts.com";
           setTimeout(() => {
             setSuccessMsg("")
           }, 3000);
-          console.log("Password changed successfully!");
           (document.getElementById("new-password") as HTMLInputElement).value = "";
           (document.getElementById("confirm-password") as HTMLInputElement).value = "";
           (document.getElementById("current-password") as HTMLInputElement).value = "";
