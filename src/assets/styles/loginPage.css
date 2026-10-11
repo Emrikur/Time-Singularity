@@ -139,7 +139,8 @@
 
 
 
-img{
+/* Scoped like .login-main; a bare img selector resized images on every page */
+.login-main img{
   width: 80%;
   margin-bottom: 1rem;
 }

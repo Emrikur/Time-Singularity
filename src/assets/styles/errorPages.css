@@ -9,6 +9,11 @@
   height: 100dvh;
   text-align: center;
 }
+
+.error-message-container img {
+  width: 80%;
+  margin-bottom: 1rem;
+}
 h1{
   font: 700 32px/1.5 "Inter", sans-serif;
 }
