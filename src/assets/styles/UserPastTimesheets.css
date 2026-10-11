@@ -24,67 +24,6 @@
   width: 100%;
 }
 
-.filterToggles {
-  --toggle-gap: 0.25rem;
-
-  position: relative;
-  display: flex;
-  width: 100%;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--toggle-gap);
-  padding: var(--toggle-gap);
-  box-sizing: border-box;
-  background: #4292fb;
-  background: linear-gradient(180deg, rgba(66, 146, 251, 1) 0%, #2f4ce5 100%);
-  border-radius: 10px;
-
-  /* Highlight pill that slides behind the active option; the overshooting
-     cubic-bezier makes it bounce past the target before settling */
-  .filter-indicator {
-    position: absolute;
-    top: var(--toggle-gap);
-    bottom: var(--toggle-gap);
-    left: var(--toggle-gap);
-    width: calc(
-      (100% - 2 * var(--toggle-gap) - (var(--option-count) - 1) * var(--toggle-gap))
-      / var(--option-count)
-    );
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateX(calc(var(--active-index) * (100% + var(--toggle-gap))));
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    pointer-events: none;
-  }
-
-  button {
-    position: relative;
-    flex: 1 1 0;
-    min-width: 0;
-    height: 44px;
-    padding: 0 0.25rem;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: white;
-    font: inherit;
-    font-size: 0.9rem;
-    cursor: pointer;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  button.active {
-    font-weight: 600;
-  }
-
-  button:focus-visible {
-    outline: 2px solid white;
-    outline-offset: -2px;
-  }
-}
-
 /* Column labels only make sense once the cards are laid out in columns */
 .timesheet-card-labels {
   display: none;
@@ -281,12 +220,6 @@
   .timesheet-card {
     min-height: 2.75rem;
     padding-block: 0.25rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .filterToggles .filter-indicator {
-    transition: none;
   }
 }
 

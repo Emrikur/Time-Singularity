@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import "../assets/styles/filterToggles.css";
 import "../assets/styles/graphs.css";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -96,6 +97,12 @@ const circumference = 2 * Math.PI * 60
 const percentage = Math.min(currentHours / weekTarget, 1)
 const offset = circumference * (1 - percentage)
 
+const filterOptions: { value: Filter; label: string; range: string }[] = [
+  { value: "week", label: "Week", range: weekRange(new Date()) },
+  { value: "month", label: "Month", range: currentMonth },
+  { value: "year", label: "Year", range: String(new Date().getFullYear()) },
+];
+
 // console.log(`Current flex: ${excessHours}hrs`,)
   return (
     <>
@@ -128,46 +135,26 @@ const offset = circumference * (1 - percentage)
         </div>
 
         <p className="reg-hour-title">Registered Hours</p>
-        <div className="timegraph-wrapper">
-          <div onClick={() => setGraphFilter("week")} className={
-              filter === "week"
-                ? "graph-week-selected"
-                : "graph-week-unselected"
-            }>
-          <p style={{margin:"0", padding:"0"}}
-
-
-          >
-            Week
-          </p>
-          <p style={{margin:"0", padding:"0", fontSize:"13px"}}>( {weekRange(new Date())} )</p>
-
-          </div>
-          <div onClick={() => setGraphFilter("month")} className={
-              filter === "month"
-                ? "graph-month-selected"
-                : "graph-month-unselected"
-            }>
-          <p style={{margin:"0", padding:"0"}}
-          >
-            Month
-          </p>
-          <p style={{fontSize:"13px", margin:"0", padding:"0"}}>( {currentMonth} )</p>
-          </div>
-          <div onClick={() => setGraphFilter("year")} className={
-              filter === "year"
-                ? "graph-year-selected"
-                : "graph-year-unselected"
-            }>
-          <p
-style={{margin:"0", padding:"0"}}
-
-          >
-            Year
-          </p>
-          <p style={{fontSize:"13px", margin:"0", padding:"0"}}>( {new Date().getFullYear()} )</p>
-
-          </div>
+        <div
+          className="filterToggles timegraph-wrapper"
+          style={{
+            "--active-index": filterOptions.findIndex((option) => option.value === filter),
+            "--option-count": filterOptions.length,
+          } as React.CSSProperties}
+        >
+          <span className="filter-indicator" aria-hidden="true" />
+          {filterOptions.map((option) => (
+            <button
+              type="button"
+              key={option.value}
+              className={filter === option.value ? "active" : undefined}
+              aria-pressed={filter === option.value}
+              onClick={() => setGraphFilter(option.value)}
+            >
+              {option.label}
+              <span className="filter-range">( {option.range} )</span>
+            </button>
+          ))}
         </div>
         {/* Graphs */}
         <div>
