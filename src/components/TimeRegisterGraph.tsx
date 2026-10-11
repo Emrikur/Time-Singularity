@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import "../assets/styles/filterToggles.css";
 import "../assets/styles/graphs.css";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -8,29 +9,8 @@ import type { Filter } from "../lib/types";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { formatEventDateTime } from "../lib/functions";
 // import { formatWeekTime } from "../lib/functions";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import { barOptions, doughnutOptions } from "../lib/chartConfig";
 import { X } from "lucide-react";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartDataLabels,
-);
 
 interface RefreshProps{
   refresh:boolean
@@ -117,52 +97,11 @@ const circumference = 2 * Math.PI * 60
 const percentage = Math.min(currentHours / weekTarget, 1)
 const offset = circumference * (1 - percentage)
 
-const barOptions = {
-  responsive:true,
-  maintainAspectRatio:true,
-  aspectRatio:1.2,
-  plugins: {
-    legend:{
-      labels: {
-        font:{size:16, weight:"bold" as const},
-        size: 16,
-        padding: 10,
-       boxWidth:14
-      },
-      position:"bottom" as const
-    },
-    datalabels: {
-      color: "black" as const,
-      font: {
-        size: 20,
-        weight: "normal" as const,
-      }
-    }
-  }
-}
-const doughnutOptions = {
-  responsive: true,
-  maintainAspectRatio: true,
-  aspectRatio: 1.0,
-  plugins: {
-    legend:{
-      labels: {
-        font:{size:16, weight:"bold" as const},
-        size: 16,
-        padding: 10,
-       boxWidth:14
-      },
-      position:"bottom" as const
-    },
-    datalabels: {
-      color: "black" as const,
-      font: {
-        size: 18,
-        weight: "normal" as const,
-      }
-    }
-  }
-}
+const filterOptions: { value: Filter; label: string; range: string }[] = [
+  { value: "week", label: "Week", range: weekRange(new Date()) },
+  { value: "month", label: "Month", range: currentMonth },
+  { value: "year", label: "Year", range: String(new Date().getFullYear()) },
+];
 
 // console.log(`Current flex: ${excessHours}hrs`,)
   return (
@@ -196,46 +135,26 @@ const doughnutOptions = {
         </div>
 
         <p className="reg-hour-title">Registered Hours</p>
-        <div className="timegraph-wrapper">
-          <div onClick={() => setGraphFilter("week")} className={
-              filter === "week"
-                ? "graph-week-selected"
-                : "graph-week-unselected"
-            }>
-          <p style={{margin:"0", padding:"0"}}
-
-
-          >
-            Week
-          </p>
-          <p style={{margin:"0", padding:"0", fontSize:"13px"}}>( {weekRange(new Date())} )</p>
-
-          </div>
-          <div onClick={() => setGraphFilter("month")} className={
-              filter === "month"
-                ? "graph-month-selected"
-                : "graph-month-unselected"
-            }>
-          <p style={{margin:"0", padding:"0"}}
-          >
-            Month
-          </p>
-          <p style={{fontSize:"13px", margin:"0", padding:"0"}}>( {currentMonth} )</p>
-          </div>
-          <div onClick={() => setGraphFilter("year")} className={
-              filter === "year"
-                ? "graph-year-selected"
-                : "graph-year-unselected"
-            }>
-          <p
-style={{margin:"0", padding:"0"}}
-
-          >
-            Year
-          </p>
-          <p style={{fontSize:"13px", margin:"0", padding:"0"}}>( {new Date().getFullYear()} )</p>
-
-          </div>
+        <div
+          className="filterToggles timegraph-wrapper"
+          style={{
+            "--active-index": filterOptions.findIndex((option) => option.value === filter),
+            "--option-count": filterOptions.length,
+          } as React.CSSProperties}
+        >
+          <span className="filter-indicator" aria-hidden="true" />
+          {filterOptions.map((option) => (
+            <button
+              type="button"
+              key={option.value}
+              className={filter === option.value ? "active" : undefined}
+              aria-pressed={filter === option.value}
+              onClick={() => setGraphFilter(option.value)}
+            >
+              {option.label}
+              <span className="filter-range">( {option.range} )</span>
+            </button>
+          ))}
         </div>
         {/* Graphs */}
         <div>

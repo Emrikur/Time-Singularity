@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import "../assets/styles/filterToggles.css"
 import "../assets/styles/UserPastTimesheets.css"
 import {fetchTimesheets, fetchUserTimesheetEntries, formatEventDateTime} from "../lib/functions"
 import { useAuth } from "../hooks/useAuth"

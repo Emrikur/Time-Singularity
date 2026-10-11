@@ -4,7 +4,7 @@ import "../assets/styles/loginPage.css";
 export default function LoginPage() {
   return (
     <>
-      <main>
+      <main className="login-main">
         {/* <div className="language-toggle-container">
 
           <div className="checkbox-wrapper-10">

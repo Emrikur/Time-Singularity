@@ -9,6 +9,7 @@ import modalRoute from "./src/api/routes/modalRoute"
 import adminRoutes from "./src/api/routes/adminRoutes"
 import companyRoute from "./src/api/routes/companyRoute"
 import userRoute from './src/api/routes/userRoute';
+import statisticsRoute from "./src/api/routes/statisticsRoute"
 import { writeLimiter } from './src/api/middleware/rateLimiters';
 
 
@@ -44,6 +45,7 @@ app.use("/company", companyRoute)
 app.use("/timeEntry", modalRoute)
 app.use("/dashboard", graphRoutes)
 app.use("/admin", adminRoutes)
+app.use("/statistics", statisticsRoute)
 app.use("/modal", modalRoute)
 app.use('/auth', router);
 
