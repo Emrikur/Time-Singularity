@@ -112,7 +112,7 @@
   display: none;
 }
 
-.timesheet-download-button:hover {
+.timesheet-download-button:hover:not(:disabled) {
   background: #f8fafc;
 }
 
