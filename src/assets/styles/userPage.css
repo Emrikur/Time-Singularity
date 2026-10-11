@@ -16,6 +16,9 @@
   width:45px;
   background-color:white;
   box-shadow:0px 0px 4px rgba(0, 0, 0, 0.25);
+  border: none;
+  padding: 0;
+  cursor: pointer;
   border-radius: 50%;
   transform: translateY(-65px)
   translateX(65px);
@@ -76,4 +79,118 @@
 
 .default-Btn{
   margin-top: auto;
+}
+
+.change-avatar:focus-visible {
+  outline: 2px solid #2f4ce5;
+  outline-offset: 2px;
+}
+
+/* Avatar picker: tap a thumbnail to preview it, tap it again (or Save) to keep it */
+
+.avatar-picker {
+  width: 90%;
+  max-width: 24rem;
+  margin: 1.5rem auto 0;
+  padding: 1rem;
+  box-sizing: border-box;
+  border-radius: 10px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+}
+
+.avatar-picker-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  justify-items: center;
+}
+
+.avatar-option {
+  width: 100%;
+  max-width: 64px;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  background: pink;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+/* Flat selector and explicit margin so no global img rule can resize the thumbnails */
+.avatar-option img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+}
+
+.avatar-option.current {
+  border-color: #9ca3af;
+}
+
+.avatar-option.previewing {
+  border-color: #2f4ce5;
+  transform: scale(1.08);
+}
+
+.avatar-option:focus-visible {
+  outline: 2px solid #2f4ce5;
+  outline-offset: 2px;
+}
+
+.avatar-option:disabled {
+  cursor: wait;
+}
+
+.avatar-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.avatar-picker-actions button {
+  height: 40px;
+  padding: 0 1.25rem;
+  border-radius: 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.avatar-picker-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.avatar-cancel-btn {
+  border: 1px solid var(--border);
+  background: white;
+  color: inherit;
+}
+
+.avatar-save-btn {
+  border: none;
+  color: white;
+  background: #5670F5;
+  background: linear-gradient(
+    180deg,
+    rgba(86, 112, 245, 1) 0%,
+    rgba(61, 52, 220, 1) 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-option {
+    transition: none;
+  }
 }

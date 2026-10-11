@@ -3,7 +3,23 @@
 export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const AVATAR_REGEX = /^[a-zA-Z0-9_-]{1,50}$/;
+// Endast avatarer som finns i public/avatars får sparas.
+// Håll i synk med AVATARS i src/lib/avatars.ts
+const AVATAR_NAMES = new Set([
+  "time-singularity",
+  "avatar-astronaut",
+  "avatar-black-hole",
+  "avatar-earth",
+  "avatar-galaxy",
+  "avatar-meteor",
+  "avatar-moon",
+  "avatar-nebula",
+  "avatar-rocket",
+  "avatar-saturn",
+  "avatar-spacecloud",
+  "avatar-spaceship",
+  "avatar-spacestation",
+]);
 
 export const MAX_HOURS_PER_ENTRY = 24;
 export const MAX_DESCRIPTION_LENGTH = 150;
@@ -28,7 +44,7 @@ export function isEmail(value: unknown): value is string {
 }
 
 export function isAvatarName(value: unknown): value is string {
-  return typeof value === "string" && AVATAR_REGEX.test(value);
+  return typeof value === "string" && AVATAR_NAMES.has(value);
 }
 
 export function isValidPassword(value: unknown): value is string {
