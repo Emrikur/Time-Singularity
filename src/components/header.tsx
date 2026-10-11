@@ -2,6 +2,7 @@
 import "../assets/styles/header.css";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { avatarSrc } from "../lib/avatars";
 // import logo from "../assets/images/navbar-square-logo.png"
 
 export default function Header() {
@@ -11,7 +12,7 @@ export default function Header() {
     navigate(`/${username}`);
   }
 
-  const currentAvatar = `/avatars/${avatar}.png`
+  const currentAvatar = avatarSrc(avatar)
   function toDashboard() {
     navigate(`/dashboard`);
   }

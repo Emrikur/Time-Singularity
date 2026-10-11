@@ -139,7 +139,7 @@ fetchUserHours()
                   aria-label={option.value === avatar ? `${option.label} (current avatar)` : option.label}
                   disabled={savingAvatar}
                 >
-                  <img src={`/avatars/${option.value}.png`} alt="" width={64} height={64} />
+                  <img src={`/avatars/${option.value}.png`} alt="" width={64} height={64} loading="lazy" decoding="async" />
                 </button>
               ))}
             </div>

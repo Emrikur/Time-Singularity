@@ -19,6 +19,7 @@ import {
 } from "../lib/functions";
 import type { EntryTypes, TimesheetTypes } from "../lib/types";
 import { useAuth } from "../hooks/useAuth";
+import { avatarSrc } from "../lib/avatars";
 export default function Approvals() {
 
   const { token } = useAuth();
@@ -59,7 +60,6 @@ export default function Approvals() {
     "#F59E0B",
     "#2563EB",
   ];
-  const avatarURL = "../avatars/";
   const uniqueUsers = new Set(timesheets.map((user) => user.user_id)).size;
   const sumofTimesheets = timesheets.length;
 
@@ -124,7 +124,7 @@ export default function Approvals() {
                     <div className="timesheet-entry-icon-container">
                       <img
                         className="avatar-icon"
-                        src={`${avatarURL}${timesheet.user_avatar}.png`}
+                        src={avatarSrc(timesheet.user_avatar)}
                         alt="Icon of the user-avatar"
                       />
                     </div>
