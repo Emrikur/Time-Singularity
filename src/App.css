@@ -1,8 +1,11 @@
 /* App wrapper with flexbox for sticky footer layout */
+/* 100dvh tracks the visible viewport on mobile, so the page itself does not
+   scroll behind the address bar on top of .app-content; 100vh is the fallback */
 #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
 }
 
@@ -12,6 +15,7 @@
   flex: 1;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .app-header {

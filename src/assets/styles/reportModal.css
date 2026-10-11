@@ -3,6 +3,7 @@
   max-width: 400px;
   width: 100%;
   height: calc(100vh - 2rem);
+  height: calc(100dvh - 2rem);
   padding-top: 1rem;
   padding-bottom: 1rem;
   overflow-x: hidden;
