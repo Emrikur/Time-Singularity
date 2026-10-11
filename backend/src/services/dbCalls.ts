@@ -690,3 +690,61 @@ export async function queryAssignUserCompanies(userId: string, companyIds: strin
     client.release();
   }
 }
+
+
+
+//##############################################################################
+
+
+
+// Statistics: all submitted and approved entries for the user, all time.
+// hourly_rate is joined from users so it is never trusted from the frontend
+export async function queryStatisticsEntries(userId: string) {
+  const response = await pool.query(
+    `SELECT time_entries.id,
+            time_entries.company_id,
+            companies.name AS company_name,
+            time_entries.work_date,
+            time_entries.hours_worked,
+            time_entries.status,
+            users.hourly_rate
+     FROM time_entries
+     JOIN companies ON time_entries.company_id = companies.id
+     JOIN users ON time_entries.user_id = users.id
+     WHERE time_entries.user_id = $1
+       AND time_entries.status IN ('submitted', 'approved')
+     ORDER BY time_entries.work_date ASC`,
+    [userId],
+  );
+
+  return response.rows;
+}
+
+
+
+//##############################################################################
+
+
+
+// Statistics: companies assigned via user_companies with aggregated hours and earnings.
+// LEFT JOIN so assigned companies without any logged hours are still listed
+export async function queryCompanyStatistics(userId: string) {
+  const response = await pool.query(
+    `SELECT companies.id,
+            companies.name AS company_name,
+            COALESCE(SUM(time_entries.hours_worked), 0) AS total_hours,
+            COALESCE(SUM(time_entries.hours_worked), 0) * users.hourly_rate AS total_earnings
+     FROM user_companies
+     JOIN companies ON user_companies.company_id = companies.id
+     JOIN users ON user_companies.user_id = users.id
+     LEFT JOIN time_entries ON time_entries.company_id = companies.id
+       AND time_entries.user_id = user_companies.user_id
+       AND time_entries.status IN ('submitted', 'approved')
+     WHERE user_companies.user_id = $1
+     GROUP BY companies.id, companies.name, users.hourly_rate
+     ORDER BY total_hours DESC, companies.name ASC`,
+    [userId],
+  );
+
+  return response.rows;
+}

@@ -8,7 +8,7 @@ interface GraphEntry{
   company_name:string,
   hours_worked:string,
   work_date:string,
-  filter:string
+  filter?:string
 }
 
 
@@ -409,4 +409,46 @@ export async function handleApproval(timesheetId:string, token:string | null, ac
   });
 
   return response;
+}
+
+
+
+//##############################################################################
+
+
+//Get all submitted and approved entries for the user, all time
+export async function fetchStatisticsEntries(token: string) {
+  const entries = await axios({
+    method: "get",
+    url: `${import.meta.env.VITE_API_URL}/statistics/entries`,
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return entries.data;
+}
+
+
+
+//##############################################################################
+
+
+//Get the user's assigned companies with aggregated hours and earnings
+export async function fetchCompanyStatistics(token: string) {
+  const companies = await axios({
+    method: "get",
+    url: `${import.meta.env.VITE_API_URL}/statistics/companies`,
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return companies.data;
+}
+
+
+
+//##############################################################################
+
+
+
+export function formatSEK(amount: number) {
+  return `${new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 }).format(amount)} SEK`;
 }

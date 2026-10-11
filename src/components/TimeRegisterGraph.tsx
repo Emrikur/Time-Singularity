@@ -8,29 +8,8 @@ import type { Filter } from "../lib/types";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { formatEventDateTime } from "../lib/functions";
 // import { formatWeekTime } from "../lib/functions";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import { barOptions, doughnutOptions } from "../lib/chartConfig";
 import { X } from "lucide-react";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartDataLabels,
-);
 
 interface RefreshProps{
   refresh:boolean
@@ -116,53 +95,6 @@ const currentMonth = new Date().toLocaleDateString("en-US", { month: "short" })
 const circumference = 2 * Math.PI * 60
 const percentage = Math.min(currentHours / weekTarget, 1)
 const offset = circumference * (1 - percentage)
-
-const barOptions = {
-  responsive:true,
-  maintainAspectRatio:true,
-  aspectRatio:1.2,
-  plugins: {
-    legend:{
-      labels: {
-        font:{size:16, weight:"bold" as const},
-        size: 16,
-        padding: 10,
-       boxWidth:14
-      },
-      position:"bottom" as const
-    },
-    datalabels: {
-      color: "black" as const,
-      font: {
-        size: 20,
-        weight: "normal" as const,
-      }
-    }
-  }
-}
-const doughnutOptions = {
-  responsive: true,
-  maintainAspectRatio: true,
-  aspectRatio: 1.0,
-  plugins: {
-    legend:{
-      labels: {
-        font:{size:16, weight:"bold" as const},
-        size: 16,
-        padding: 10,
-       boxWidth:14
-      },
-      position:"bottom" as const
-    },
-    datalabels: {
-      color: "black" as const,
-      font: {
-        size: 18,
-        weight: "normal" as const,
-      }
-    }
-  }
-}
 
 // console.log(`Current flex: ${excessHours}hrs`,)
   return (

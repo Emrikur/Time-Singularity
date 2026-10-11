@@ -56,3 +56,20 @@ export interface TimesheetTypes{
       submitted_at:string
       approved_at?:string | null;
 }
+
+export interface StatisticsEntryTypes{
+      id:string;
+      company_id:string;
+      company_name:string;
+      work_date:string;
+      hours_worked:string;
+      status:string;
+      hourly_rate:string;
+}
+
+export interface CompanyStatisticsTypes{
+      id:string;
+      company_name:string;
+      total_hours:string;
+      total_earnings:string;
+}
