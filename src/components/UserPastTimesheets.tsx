@@ -114,19 +114,26 @@ if(!token){
         aria-hidden="true"
       />
     </button>
-    {e.status === "approved" && (
-      <button
-        type="button"
-        className="timesheet-download-button"
-        onClick={() => handleDownload(e)}
-        disabled={!entriesLoaded}
-        title={entriesLoaded ? undefined : "Timesheet entries are unavailable"}
-        aria-label={`Download ${formatEventDateTime(e.month, {year:"numeric", month:"long"})} timesheet as PDF`}
-      >
-        <Download size={18} aria-hidden="true" />
-        <span className="timesheet-download-label">PDF</span>
-      </button>
-    )}
+    {/* Rendered for every status so all rows keep the same width; only approved timesheets can be downloaded */}
+    <button
+      type="button"
+      className="timesheet-download-button"
+      onClick={() => handleDownload(e)}
+      disabled={e.status !== "approved" || !entriesLoaded}
+      title={
+        e.status !== "approved"
+          ? "PDF is available once the timesheet is approved"
+          : entriesLoaded ? undefined : "Timesheet entries are unavailable"
+      }
+      aria-label={
+        e.status !== "approved"
+          ? `PDF for ${formatEventDateTime(e.month, {year:"numeric", month:"long"})} is available once the timesheet is approved`
+          : `Download ${formatEventDateTime(e.month, {year:"numeric", month:"long"})} timesheet as PDF`
+      }
+    >
+      <Download size={18} aria-hidden="true" />
+      <span className="timesheet-download-label">PDF</span>
+    </button>
     {expandedId === e.id && (
       <div className="timesheet-entry-details">
         {e.status === "edit" && <p>Entries awaiting editing</p>}
