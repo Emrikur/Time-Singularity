@@ -1,4 +1,5 @@
-main{
+/* Scoped to the login page; a bare `main` selector also hit LayoutWrapper`s <main> on every page */
+.login-main{
   display: flex;
   align-items: center;
   justify-content: center;

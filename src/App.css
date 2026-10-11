@@ -23,6 +23,14 @@
 
 .app-content {
   flex: 1;
+  display: flex;
+  justify-content: center;
+  /* Centers short pages vertically, but "safe" falls back to the top once the
+     content is taller than <main>; plain center pushes the overflow above the
+     scroll origin where it cannot be scrolled to. flex-start is the fallback
+     for browsers without "safe" support */
+  align-items: flex-start;
+  align-items: safe center;
   width: 100%;
   overflow-y: scroll;
   overflow-x: hidden;
