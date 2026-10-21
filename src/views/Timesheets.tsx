@@ -181,25 +181,32 @@ export default function Timesheets() {
     }
   }
 
+  // Months and timesheets don't depend on the selected month, so they live in
+  // their own effect. Otherwise every month change would refetch the months and
+  // reset the selection back to the first (current) month.
   useEffect(() => {
-
     if(!token){
       navigate("/")
       return;
     }
-    getdraftMonthNames(token).then((response) => {
+    getdraftMonthNames(token).then((response: MonthTypes[]) => {
       setMonths(response);
-      if (response.length > 0) {
-        setSelectedOptions(response[0].month);
-      }
+      // Keep the user's pick if it still exists (e.g. after a refresh),
+      // fall back to the first month otherwise (first load, or after sign-off).
+      setSelectedOptions((current) =>
+        response.some((month) => month.month === current)
+          ? current
+          : response[0]?.month ?? "",
+      );
     }).catch((error) => console.error("Could not load months", error));
-
 
     fetchTimesheets(token).then((response) => {
       setTimesheets(response);
     }).catch((error) => console.error("Could not load timesheets", error));
+  }, [navigate, refresh, token]);
 
-    if (!selectedOption) {
+  useEffect(() => {
+    if (!token || !selectedOption) {
       return;
     }
 
@@ -224,7 +231,7 @@ export default function Timesheets() {
     }
 
     getEntries();
-  }, [selectedOption, refresh, token]);
+  }, [navigate, selectedOption, refresh, token]);
 
   useEffect(() => {
     if (!token) {
@@ -329,6 +336,7 @@ export default function Timesheets() {
         </div>
         <select
           className="month-select"
+          value={selectedOption}
           onChange={(e) => setSelectedOptions(e.target.value)}
         >
           {months.map((entry: { month: string }) => (
