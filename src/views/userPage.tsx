@@ -111,7 +111,7 @@ fetchUserHours()
             aria-expanded={avatarToggle}
             aria-controls="avatar-picker"
           >
-            <Images style={{color:"black"}}/>
+            <Images style={{color:"var(--ink)"}} aria-hidden="true"/>
           </button>
           </div>
           <p className="user-name">{username}</p>
@@ -163,10 +163,10 @@ fetchUserHours()
         </div>
 
         <div className="userpage-btn-wrapper">
-          <div onClick={() => navigate("/settings")} className="default-Btn" >
-            <Settings/>
-            <p style={{fontSize:"16px", padding:"0", margin:"0"}}>Settings</p>
-          </div>
+          <button type="button" onClick={() => navigate("/settings")} className="default-Btn press">
+            <Settings aria-hidden="true"/>
+            Settings
+          </button>
           <LogoutBtn/>
         </div>
 

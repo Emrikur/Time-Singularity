@@ -25,8 +25,8 @@ export default function Header() {
 
         </div>
         <div className="userHub">
-          <h2 onClick={toDashboard} style={{fontSize:"1rem", margin:"0", padding:"0", fontFamily: "'Manrope', sans-serif" }}>Dashboard</h2>{/* <House  height={35} width={35} onClick={toDashboard}/> */}
-          <img id="user-avatar" onClick={toUserPage} src={currentAvatar} alt="an image-link to the user page of a oil painted bear, sitting." />
+          <h2 onClick={toDashboard} style={{fontSize:"1rem", margin:"0", padding:"0", fontFamily: "var(--font-display)" }}>Dashboard</h2>{/* <House  height={35} width={35} onClick={toDashboard}/> */}
+          <img id="user-avatar" className="press" onClick={toUserPage} src={currentAvatar} alt="an image-link to the user page of a oil painted bear, sitting." />
         </div>
       </header>
     </>

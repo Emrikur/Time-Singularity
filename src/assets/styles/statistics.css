@@ -29,15 +29,11 @@
 .statistics-card {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  border-radius: 10px;
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
   color: white;
-  background: #4292fb;
-  background: linear-gradient(
-    180deg,
-    rgba(66, 146, 251, 1) 0%,
-    #2f4ce5 100%
-  );
+  background: var(--gradient-brand);
+  box-shadow: var(--shadow-brand);
 
   p {
     margin: 0;
@@ -45,16 +41,19 @@
 }
 
 .statistics-card-label {
+  font-size: 14px;
   font-weight: 500;
 }
 
 .statistics-card-value {
-  font-size: 28px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 
   span {
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
   }
 }
 
@@ -82,15 +81,11 @@
 }
 
 .statistics-company {
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 0 5px 1px gainsboro;
-  background: #ffffff;
-  background: linear-gradient(
-    180deg,
-    rgb(255, 255, 255) 0%,
-    rgb(243, 243, 243) 100%
-  );
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  background: var(--surface);
 }
 
 .statistics-company-header {
@@ -108,20 +103,22 @@
 .statistics-company-bar {
   height: 8px;
   margin: 0.75rem 0;
-  border-radius: 4px;
-  background-color: #e5e7eb;
+  border-radius: 999px;
+  background-color: #E9EBF1;
 
   div {
     height: 100%;
-    border-radius: 4px;
-    background: linear-gradient(90deg, #4292fb 0%, #2f4ce5 100%);
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--brand-400) 0%, var(--brand-500) 100%);
   }
 }
 
 .statistics-company-details {
   display: flex;
   justify-content: space-between;
-  color: var(--text-muted);
+  font-size: 14px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (min-width: 768px) {

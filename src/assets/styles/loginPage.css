@@ -94,7 +94,7 @@
   position: absolute;
   line-height: 2em;
   font-weight: bold;
-  color: #1A64FF;
+  color: var(--brand-500);
   top: 0;
   left: 0;
   -webkit-backface-visibility: hidden;

@@ -6,59 +6,10 @@
   padding: 0;
 }
 
-
-#password-modal::backdrop {
-  background: rgba(0, 0, 0, 0.5);
-  transition: opacity 0.25s ease;
-  display: 0.25s allow-discrete; overlay: 0.25s allow-discrete;
-  opacity: 1;
+/* Were divs (content-box, 320px wide incl. padding) before becoming real
+   buttons, which default to border-box; keep the old size */
+.settings-btn-wrapper .default-Btn {
+  box-sizing: content-box;
 }
-#password-modal{
-    opacity: 0;
-    transform: translateY(16px) scale(0.98);
-    transition: opacity 0.25s ease, transform 0.25s ease,
-    display 0.25s allow-discrete, overlay 0.25s allow-discrete;
-    pointer-events: none;
 
-
-    flex-direction: column;
-    z-index: 200;
-    width: 80vw;
-    height: fit-content;
-    overflow-y: scroll;
-    border-radius: 5px;
-    position: absolute;
-    margin: 0 auto;
-    background-color: #ffffff;
-    pointer-events: none;
-     top: 12%;
-     padding-bottom: 3rem;
-  }
-
-  #password-modal[open] {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    display: flex;
-    flex-direction: column;
-    z-index: 200;
-    width: 80vw;
-    height: fit-content;
-    overflow-y: scroll;
-    border-radius: 5px;
-    position: absolute;
-    margin: 0 auto;
-    background-color: #ffffff;
-    pointer-events: auto;
-     top: 12%;
-
-  .close-modal {
-    align-self: flex-end;
-  }
-  }
-
-  @starting-style{
-    #password-modal[open]{
-      opacity: 0;
-      transform: translateY(16px) scale(0.98);
-    }
-  }
+/* #password-modal is shown as a .sheet (index.css) */

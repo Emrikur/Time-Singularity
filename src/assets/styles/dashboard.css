@@ -13,52 +13,76 @@
   align-items: center;
 }
 
+/* .grain/.grain--soft add the texture; children are lifted above it */
 .dashboard-hero {
   display: flex;
-  flex-direction: column;
-  gap : 1rem;
-  justify-content: center;
-  padding-left: 10px;
-  padding-bottom: 2rem;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 18px;
+  box-sizing: border-box;
   text-align: left;
-  background: #ffffff;
-  background: linear-gradient(
-    0deg,
-    rgb(255, 255, 255) 0%,
-    rgb(243, 243, 243) 100%
-  );
-  box-shadow:0px 0px 4px rgba(0, 0, 0, 0.25);
-  border-radius: 10px;
+  background: linear-gradient(170deg, #fff 0%, #F1F3F8 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   height: fit-content;
   p {
     margin: 0;
-  }
-
-  svg{
-    padding: 10px
   }
 }
 
 .welcome-message{
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.hero-date {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.hero-greeting {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.log-entry {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  font-size: 28px;
-  font-weight: 600;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.log-entry-btn {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--gradient-button);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(53, 87, 232, .30);
+}
+
+.log-entry-btn:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 3px;
 }
 
 .log-entry-label{
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 10px;
-
-  p{
-    font-size: 18px;
-     margin: 0;
-  }
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-2);
 }
 
 .user-name {
@@ -71,7 +95,7 @@
   padding: 0;
   margin: 0 0 5px 0;
   font-size: 24px;
-  color: var(--text-muted);
+  color: var(--ink-2);
 }
 
 
@@ -79,64 +103,126 @@
 
 
 
-#log-modal::backdrop {
-  background: rgba(0, 0, 0, 0.5);
-  transition: opacity 0.25s ease;
-  display: 0.25s allow-discrete; overlay: 0.25s allow-discrete;
-  opacity: 1;
-}
-#log-modal{
-    opacity: 0;
-    transform: translateY(16px) scale(0.98);
-    transition: opacity 0.25s ease, transform 0.25s ease,
-    display 0.25s allow-discrete, overlay 0.25s allow-discrete;
-    pointer-events: none;
-    box-sizing: border-box;
-    flex-direction: column;
-    z-index: 200;
-    width: 90%;
-    height: fit-content;
-    overflow-y: scroll;
-    border-radius: 5px;
-    position: absolute;
-    margin: 0 auto;
-    background-color: #ffffff;
-    pointer-events: none;
-     top: 12%;
-  }
-
-  #log-modal[open] {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+/* QuickLogModal's form. Its classes are shared with the Time Report page and
+   Settings, so everything here is scoped to #log-modal */
+#log-modal .modal-form {
   display: flex;
   flex-direction: column;
-  z-index: 200;
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+#log-modal .sheet-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+#log-modal .sheet-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+#log-modal label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+/* 16px rather than 15px: iOS Safari zooms the page into any field under 16px */
+#log-modal :is(select, input),
+#log-modal #textarea {
   box-sizing: border-box;
-  width: 90%;
-  max-height: calc(100vh - 2rem);
-  max-height: calc(100dvh - 2rem);
-  height: calc(100vh - 2rem);
-  height: calc(100dvh - 2rem);
-  overflow-y: scroll;
-  border-radius: 5px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%) translateY(0) scale(1);
-  background-color: #ffffff;
-  pointer-events: auto;
-  top: 1rem;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 16px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
 
-  .close-modal {
-    align-self: flex-end;
-  }
-  }
+#log-modal #textarea {
+  height: 96px;
+  padding: 12px 14px;
+  resize: none;
+}
 
-  @starting-style{
-    #log-modal[open]{
-      opacity: 0;
-      transform: translateY(16px) scale(0.98);
-    }
+#log-modal :is(select, input):focus,
+#log-modal #textarea:focus {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px rgba(53,87,232,.18);
+  outline: none;
+}
+
+#log-modal .peptalk {
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--brand-50);
+  color: var(--brand-600);
+  font-size: 13px;
+  font-weight: 500;
+  font-style: italic;
+}
+
+#log-modal .description-wrapper {
+  width: 100%;
+  margin: 0;
+  gap: 6px;
+  align-items: stretch;
+}
+
+#log-modal .word-count,
+#log-modal .word-count-exceeded {
+  margin: 0;
+  font-size: 12px;
+}
+
+#log-modal .word-count {
+  color: var(--ink-2);
+}
+
+#log-modal .entry-submit-btn {
+  width: 100%;
+  height: 52px;
+  margin: 4px 0 0;
+  border-radius: var(--radius-md);
+  background: var(--gradient-button);
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform var(--press);
+
+  p {
+    margin: 0;
   }
+}
+
+#log-modal .entry-submit-btn:disabled {
+  background: #A0A0A0;
+}
+
+#log-modal :is(.success-message, .failed-message) {
+  margin: 0;
+  text-align: center;
+}
+
 
   #entry-detail-modal::backdrop {
     background: rgba(0, 0, 0, 0.5);
@@ -147,7 +233,7 @@
     max-height: calc(100vh - 2rem);
     max-height: calc(100dvh - 2rem);
     border: none;
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
     box-sizing: border-box;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -155,6 +241,10 @@
 
   #entry-detail-modal .close-modal {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
     margin-left: auto;
     padding: 0;
     border: none;

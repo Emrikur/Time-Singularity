@@ -15,6 +15,7 @@
   margin: 1rem 0;
   font-size: 1.5rem;
   text-align: center;
+  font-family: var(--font-display);
 }
 
 .report-form {
@@ -40,8 +41,9 @@
   min-width: 0;
 
   label {
-    font-size: 0.9rem;
-    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
   }
 }
 
@@ -55,20 +57,21 @@
 /* 16px text keeps iOS from zooming in on focus; 44px meets the touch target size */
 .report-input {
   width: 100%;
-  min-height: 44px;
-  padding: 0 0.75rem;
+  min-height: 48px;
+  padding: 0 14px;
   box-sizing: border-box;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background: white;
-  color: var(--text-h);
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
   font: inherit;
   font-size: 16px;
 }
 
 .report-input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px rgba(53,87,232,.18);
 }
 
 /* iOS renders an empty date input with no height unless it's given one */
@@ -76,7 +79,7 @@
   display: block;
   -webkit-appearance: none;
   appearance: none;
-  line-height: 42px;
+  line-height: 46px;
 }
 
 .report-hours-input {
@@ -100,7 +103,7 @@
   top: 50%;
   right: 0.75rem;
   transform: translateY(-50%);
-  color: var(--text);
+  color: var(--ink-3);
   pointer-events: none;
 }
 
@@ -108,7 +111,7 @@
 .report-description textarea.report-input {
   min-height: 110px;
   max-height: 160px;
-  padding: 0.5rem 0.75rem;
+  padding: 12px 14px;
   resize: vertical;
 }
 
@@ -116,11 +119,11 @@
   align-self: flex-end;
   margin: 0;
   font-size: 0.8rem;
-  color: var(--text);
+  color: var(--ink-2);
 }
 
 .report-counter.exceeded {
-  color: red;
+  color: var(--danger-text);
 }
 
 .report-submit {
@@ -141,11 +144,11 @@
 }
 
 .report-message.success {
-  color: #34B567;
+  color: var(--success-text);
 }
 
 .report-message.failed {
-  color: red;
+  color: var(--danger-text);
 }
 
 /* Short landscape phones: fields on the left, description on the right,
@@ -188,29 +191,15 @@
 
   .input-date:focus{
     outline: none;
-    border-color: var(--primary);
+    border-color: var(--brand-500);
   }
 
 
 
 
-  .hours{
-    display: flex;
-    margin: .5rem 10px .5rem auto;
-    flex-direction: row;
-    background-color: gray;
-    align-items: center;
-    width: 30%;
-    height: 48px;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-
-    }
-
-
     .hours-input:focus, .report-hour-rate-input:focus{
       outline: none;
-      border-color: var(--primary);
+      border-color: var(--brand-500);
     }
 
 
@@ -222,7 +211,7 @@
   font-size: 16px;
   padding-left: .5rem;
   border:none;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   font-family: inherit;
 }
 
@@ -235,7 +224,7 @@
   width: 100%;
   label{
     font-size: 0.9rem;
-    color: var(--text);
+    color: var(--ink-2);
     margin-left: 13px;
   }
 
@@ -244,35 +233,35 @@
     height: 100px;
     padding: 0.5rem;
     margin: 0 auto;
-    border: 1px solid var(--border);
-    border-radius: 5px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
     resize: none;
     font-family: inherit;
   }
 
   #textarea:focus{
     outline: none;
-    border-color: var(--primary);
+    border-color: var(--brand-500);
   }
 
 
 }
 
 .success-message{
-  color:#34B567;
+  color: var(--success-text);
   padding: 1rem;
   font-size: 18px;
   transition: 3s ease-in-out;
 }
 .failed-message{
-  color:red;
+  color: var(--danger-text);
   padding: 1rem;
   font-size: 18px;
   transition: 3s ease-in-out;
 }
 
 .word-count{
-  color: var(--text);
+  color: var(--ink-2);
   font-size: 0.8rem;
   align-self: flex-end;
   margin-right: 5%;
@@ -282,7 +271,7 @@
   font-size: 0.8rem;
   align-self: flex-end;
   margin-right: 5%;
-  color: red;
+  color: var(--danger-text);
 }
 
 .default-Btn:disabled{

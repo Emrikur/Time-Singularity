@@ -14,9 +14,10 @@
   width: 80%;
   margin-bottom: 1rem;
 }
-h1{
-  font: 700 32px/1.5 "Inter", sans-serif;
+/* Scoped: bare h1/p selectors here applied to every page in the bundle */
+.error-message-container h1{
+  font: 700 32px/1.5 var(--font-display);
 }
-p{
-  font: 500 16px/1.5 "Inter", sans-serif;
+.error-message-container p{
+  font: 500 16px/1.5 var(--font-body);
 }

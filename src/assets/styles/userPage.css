@@ -14,9 +14,9 @@
   align-items: center;
   height:45px;
   width:45px;
-  background-color:white;
-  box-shadow:0px 0px 4px rgba(0, 0, 0, 0.25);
-  border: none;
+  background-color: var(--surface);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--line);
   padding: 0;
   cursor: pointer;
   border-radius: 50%;
@@ -25,7 +25,7 @@
 }
 .title-wrapper {
   margin: 0 auto;
-  border-bottom: solid black 1.5px;
+  border-bottom: 1px solid var(--line);
   width: fit-content;
   padding: 0 30px;
   margin-top: 2px;
@@ -35,7 +35,7 @@
   font-size: 1.2rem;
   margin-top: 0.1rem;
   margin-bottom: 0.1rem;
-  color: var(--text-muted);
+  color: var(--ink-2);
 }
 
 .userpage-hour-summary{
@@ -44,8 +44,10 @@
   align-items: center;
   justify-content: space-evenly;
 
-  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
-  border-radius: 10px;
+  background: var(--surface);
+  /* Outline drawn as a shadow ring so it adds no width */
+  box-shadow: 0 0 0 1px var(--line), var(--shadow-md);
+  border-radius: var(--radius-lg);
   padding: 20px;
   width: 90%;
   margin-top: 3rem;
@@ -58,14 +60,8 @@
   width: 75px;
   height: 75px;
   color: white;
-  background: #5670F5;
-  background: linear-gradient(
-    180deg,
-    rgb(118, 139, 241) 0%,
-
-    rgb(48, 39, 214) 100%
-  );
-  border-radius: 10px;
+  background: var(--gradient-button);
+  border-radius: var(--radius-md);
   padding: 15px;
   margin-bottom: 1rem;
 }
@@ -81,8 +77,15 @@
   margin-top: auto;
 }
 
+/* These were divs (content-box, 300px + padding = 320px wide) before becoming
+   real buttons, which default to border-box; keep the old size, since the
+   buttons set this page's width and the cards are a percentage of it */
+.userpage-btn-wrapper .default-Btn {
+  box-sizing: content-box;
+}
+
 .change-avatar:focus-visible {
-  outline: 2px solid #2f4ce5;
+  outline: 2px solid var(--brand-500);
   outline-offset: 2px;
 }
 
@@ -94,15 +97,16 @@
   margin: 1.5rem auto 0;
   padding: 1rem;
   box-sizing: border-box;
-  border-radius: 10px;
-  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
-  background: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  background: var(--surface);
 }
 
 .avatar-picker-hint {
   margin: 0 0 0.75rem;
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: var(--ink-2);
 }
 
 /* Scrolls inside a fixed height so Save stays close; padding leaves room for the
@@ -144,16 +148,16 @@
 }
 
 .avatar-option.current {
-  border-color: #9ca3af;
+  border-color: var(--ink-3);
 }
 
 .avatar-option.previewing {
-  border-color: #2f4ce5;
+  border-color: var(--brand-500);
   transform: scale(1.08);
 }
 
 .avatar-option:focus-visible {
-  outline: 2px solid #2f4ce5;
+  outline: 2px solid var(--brand-500);
   outline-offset: 2px;
 }
 
@@ -169,9 +173,9 @@
 }
 
 .avatar-picker-actions button {
-  height: 40px;
+  height: 44px;
   padding: 0 1.25rem;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   font: inherit;
   cursor: pointer;
 }
@@ -182,20 +186,15 @@
 }
 
 .avatar-cancel-btn {
-  border: 1px solid var(--border);
-  background: white;
+  border: 1px solid var(--field-line);
+  background: var(--surface);
   color: inherit;
 }
 
 .avatar-save-btn {
   border: none;
   color: white;
-  background: #5670F5;
-  background: linear-gradient(
-    180deg,
-    rgba(86, 112, 245, 1) 0%,
-    rgba(61, 52, 220, 1) 100%
-  );
+  background: var(--gradient-button);
 }
 
 @media (prefers-reduced-motion: reduce) {

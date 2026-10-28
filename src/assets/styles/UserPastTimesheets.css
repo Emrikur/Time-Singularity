@@ -4,20 +4,36 @@
 .timesheet-container {
   --download-col: 3rem;
   --card-cols: 1fr auto 1.5rem;
-  --card-padding-x: 0.75rem;
+  --card-padding-x: 16px;
 
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
   padding-bottom: 15px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .timesheet-container h2 {
   margin: 0.75rem 0;
+  font-family: var(--font-display);
+}
+
+/* Inset the segmented control from the card edges */
+.timesheet-content > .filterToggles {
+  width: calc(100% - 2 * var(--card-padding-x));
+  margin: 0 auto 0.5rem;
+}
+
+/* Four options: slightly smaller labels so "Approved" fits at 375px */
+.timesheet-content > .filterToggles button {
+  padding: 0 2px;
+  font-size: 13px;
 }
 
 .timesheet-content {
@@ -37,6 +53,7 @@
   display: grid;
   grid-template-columns: 1fr var(--download-col);
   width: 100%;
+  border-top: 1px solid var(--line-soft);
 }
 
 .timesheet-card {
@@ -49,20 +66,28 @@
   align-items: center;
   column-gap: 0.75rem;
   min-height: 3.5rem;
-  padding: 0.5rem var(--card-padding-x);
+  padding: 14px var(--card-padding-x);
   box-sizing: border-box;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border: none;
-  background: white;
+  background: var(--surface);
   color: inherit;
   cursor: pointer;
   font: inherit;
   text-align: left;
+  transition: background-color .15s ease, transform var(--press);
 
   p {
     margin: 0;
     min-width: 0;
   }
+}
+
+.timesheet-card:hover {
+  background: #F3F5FC;
+}
+
+.timesheet-card:active {
+  transform: scale(.985);
 }
 
 .timesheet-month {
@@ -72,13 +97,13 @@
 
 .timesheet-status {
   grid-area: status;
-  text-transform: capitalize;
+  justify-self: start;
 }
 
 .timesheet-submitted {
   grid-area: submitted;
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--ink-2);
 }
 
 .timesheet-chevron {
@@ -99,9 +124,8 @@
   gap: 0.4rem;
   padding: 0 0.5rem;
   border: 0;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fff;
-  color: #2f4ce5;
+  background: var(--surface);
+  color: var(--brand-500);
   cursor: pointer;
   font: inherit;
   white-space: nowrap;
@@ -113,7 +137,7 @@
 }
 
 .timesheet-download-button:hover:not(:disabled) {
-  background: #f8fafc;
+  background: #F3F5FC;
 }
 
 .timesheet-download-button:disabled {
@@ -123,7 +147,7 @@
 
 .timesheet-download-button:focus-visible,
 .timesheet-card:focus-visible {
-  outline: 2px solid #2f4ce5;
+  outline: 2px solid var(--brand-500);
   outline-offset: -2px;
 }
 
@@ -154,26 +178,11 @@
   margin: 0.25rem 0;
 }
 
-.timesheet-status-pending {
-  color: #eab308;
-}
-.timesheet-status-approved {
-  color: #22c55e;
-}
-.timesheet-status-rejected {
-  color: #ef4444;
-}
-
 /* Landscape phones, tablets and up: one row per timesheet with aligned columns */
 @media (min-width: 550px) {
   .timesheet-container {
     --download-col: 5rem;
     --card-cols: 2fr 1fr 1.5fr 1.5rem;
-    --card-padding-x: 1rem;
-  }
-
-  .filterToggles button {
-    font-size: 1rem;
   }
 
   .timesheet-card-labels {
@@ -182,7 +191,7 @@
     column-gap: 0.75rem;
     padding: 0 calc(var(--card-padding-x) + var(--download-col)) 0 var(--card-padding-x);
     font-size: 0.85rem;
-    color: #6b7280;
+    color: var(--ink-2);
 
     p {
       margin: 0.75rem 0 0.5rem;
@@ -213,8 +222,8 @@
     margin: 0.5rem 0;
   }
 
-  .filterToggles button {
-    height: 40px;
+  .timesheet-content > .filterToggles {
+    height: 48px;
   }
 
   .timesheet-card {
