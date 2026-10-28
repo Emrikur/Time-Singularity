@@ -375,7 +375,15 @@ width: 35px;
     flex-direction: column;
     align-items: flex-end;
     justify-content: center;
+    gap: 0.4rem;
     margin: 1rem 1rem 1rem auto;
+
+    /* Status pill and delete share a row so the card stays compact */
+    .draft-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
 
     .status-container {
       background-color: #ebecf0;
@@ -400,8 +408,8 @@ width: 35px;
   min-height: 44px;
   background-color: transparent;
   font-weight: 500;
-  margin-top: 5px;
-  margin-right: 10px;
+  padding: 0 0.5rem;
+  margin-right: -0.5rem;
   color: var(--danger-text);
   border: none;
   cursor: pointer;

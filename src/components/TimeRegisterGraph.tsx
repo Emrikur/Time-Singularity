@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "../assets/styles/filterToggles.css";
 import "../assets/styles/graphs.css";
 import { useAuth } from "../hooks/useAuth";
@@ -38,8 +38,8 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
   const { token } = useAuth();
   const [filter, setGraphFilter] = useState<Filter>("week");
   const [responseData, setResponseData] = useState<GraphType[]>([]);
-  // The filter responseData was fetched for; the chart is keyed on it so the bars
-  // replay once the new data is in, not with the previous filter's data first
+  // The filter responseData was fetched for, so the chart is formatted with the
+  // matching filter and never mixes the new filter with the previous data
   const [loadedFilter, setLoadedFilter] = useState<Filter>("week");
   const [ringDrawn, setRingDrawn] = useState(false);
   const [currentWeek, setCurrentWeek] = useState<GraphType[]>([])
@@ -109,6 +109,11 @@ const circumference = 2 * Math.PI * 60
 const percentage = Math.min(currentHours / weekTarget, 1)
 const offset = ringDrawn ? circumference * (1 - percentage) : circumference
 const shownHours = useCountUp(currentHours, 1100)
+// Chart data is only rebuilt when the data itself changes. A fresh object on every
+// render (the count-up re-renders each frame) makes react-chartjs-2 call
+// chart.update(), which restarts the bar animation and swallows the bounce
+const barData = useMemo(() => formatGraphData(responseData, loadedFilter), [responseData, loadedFilter])
+const doughnutData = useMemo(() => formatDoughnutData(responseData), [responseData])
 const totalHours = responseData.reduce((sum, entry) => sum + Number(entry.hours_worked), 0)
 
 const filterOptions: { value: Filter; label: string; range: string }[] = [
@@ -224,15 +229,15 @@ const filterOptions: { value: Filter; label: string; range: string }[] = [
             {responseData && responseData.length > 0 ? (
               loadedFilter === "month" ?
                 <Doughnut
-                  key={loadedFilter}
                   className="donut-graph"
-                  data={formatDoughnutData(responseData)}
+                  data={doughnutData}
                   options={doughnutOptions}
                 />
               :
+                // Not keyed: the same chart stays mounted between week and year so
+                // the bars morph to the new values instead of starting over
                 <Bar
-                  key={loadedFilter}
-                  data={formatGraphData(responseData, loadedFilter)}
+                  data={barData}
                   options={barOptions}/>
             ) : (
               <p className="missing-graph-data">No hours logged at these dates, report at <a href="/time-report">Time-report</a></p>
