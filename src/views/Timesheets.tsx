@@ -458,6 +458,7 @@ export default function Timesheets() {
                           year: "numeric",
                         })}
                       </p>
+                      <div className="draft-card-actions">
                       <div className="status-container">
                         <p>{entry.status.replace("d", "D")}</p>
                       </div>
@@ -476,6 +477,7 @@ export default function Timesheets() {
                       >
                         delete
                       </button>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -507,6 +509,7 @@ export default function Timesheets() {
                       year: "numeric",
                     })}
                   </p>
+                  <div className="draft-card-actions">
                   <div className="status-container">
                     <p>{entry.status.replace("d", "D")}</p>
                   </div>
@@ -525,6 +528,7 @@ export default function Timesheets() {
                   >
                     delete
                   </button>
+                  </div>
                 </div>
               </div>
             ))
