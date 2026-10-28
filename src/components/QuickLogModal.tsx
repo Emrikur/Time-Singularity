@@ -180,30 +180,40 @@ return
   return (
     <>
       <form className="modal-form" onSubmit={async (e) => {await handleFormSubmit(e); handleRefresh()}}>
-        <select className="modal-company-select" name="company">
-          {/* Company with a inactive status is not shown in the company list */}
-          {dbResponse ? dbResponse.filter((company) => company.is_active).map((company) => <option className="form-option" value={company.id} key={company.id}>{company.name}</option>): null}
-        </select>
+        <div className="sheet-field">
+          <label htmlFor="quicklog-company">Company</label>
+          <select id="quicklog-company" className="modal-company-select" name="company">
+            {/* Company with a inactive status is not shown in the company list */}
+            {dbResponse ? dbResponse.filter((company) => company.is_active).map((company) => <option className="form-option" value={company.id} key={company.id}>{company.name}</option>): null}
+          </select>
+        </div>
 
-          <input
-          max={new Date().toISOString().split('T')[0]}
-          onClick={(e) => e.currentTarget.showPicker()}
-          className="input-date" name="date"  type="date" />
-
-          <p className="peptalk">*{pepTalk}*</p>
-          <div className="hours">
-            <input name="hours" placeholder="Hours" className="hours-input" type="text" />
+        <div className="sheet-row">
+          <div className="sheet-field">
+            <label htmlFor="quicklog-date">Date</label>
+            <input
+            id="quicklog-date"
+            max={new Date().toISOString().split('T')[0]}
+            onClick={(e) => e.currentTarget.showPicker()}
+            className="input-date" name="date"  type="date" />
+          </div>
+          <div className="sheet-field">
+            <label htmlFor="quicklog-hours">Hours</label>
+            <input id="quicklog-hours" name="hours" placeholder="0" className="hours-input" type="text" />
             {/* <ClockPlus className="hours-icon" size={20}/> */}
           </div>
+        </div>
+
+          <p className="peptalk">{pepTalk}</p>
 
 
         <div className="description-wrapper">
-          <label htmlFor="description">Description</label>
+          <label htmlFor="textarea">Description</label>
           <textarea onChange={(e) => setWordCounter(e.currentTarget.value.length)} name="description" id="textarea"/>
           <p className={wordCounter > 150 ? "word-count-exceeded" : "word-count"}>{wordCounter}/150</p>
         </div>
 
-        {formResponse ? <p className={formResponse.success ? "success-message" : "failed-message"}>{formResponse.message}</p> : <button disabled={isGuest} className="entry-submit-btn" type="submit"><CirclePlus/><p>Log hrs</p> </button>}
+        {formResponse ? <p className={formResponse.success ? "success-message" : "failed-message"}>{formResponse.message}</p> : <button disabled={isGuest} className="entry-submit-btn press" type="submit"><CirclePlus/><p>Log hrs</p> </button>}
 
       </form>
     </>

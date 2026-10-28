@@ -363,12 +363,7 @@ export default function Timesheets() {
           </div>
           <button
             disabled={entries.length < 1 || isGuest}
-            className="timesheets-signoff-button"
-            style={{
-              backgroundColor:
-                entries.length < 1 || isGuest ? "rgb(161, 161, 161)" : "#ffffff",
-              color: entries.length < 1 || isGuest ? "#000c4b" : "#2f4ce5",
-            }}
+            className="timesheets-signoff-button press"
             onClick={async () => {
               await handleSignoff();
               handleRefresh();
@@ -383,7 +378,7 @@ export default function Timesheets() {
             <h3>Time Entries</h3>{" "}
             <div
               style={{
-                color: "#1A5AF4",
+                color: "var(--brand-500)",
                 display: "flex",
                 alignItems: "center",
                 gap: ".5rem",
@@ -395,6 +390,9 @@ export default function Timesheets() {
                     position: "relative",
                     display: "inline-flex",
                     alignItems: "center",
+                    justifyContent: "center",
+                    minWidth: "44px",
+                    minHeight: "44px",
                   }}
                 >
                   <ListFilter size={30} />
@@ -572,7 +570,7 @@ export default function Timesheets() {
                   </div>
                 ))
               ) : (
-                <p style={{ color: "gray", marginLeft: "10px" }}>
+                <p style={{ color: "var(--ink-2)", marginLeft: "10px" }}>
                   No submitted timesheets
                 </p>
               )}

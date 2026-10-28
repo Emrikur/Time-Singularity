@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { LogOut, X, RectangleEllipsis } from "lucide-react";
 import ChangePasswordForm from '../components/ChangePasswordForm';
+import { closeOnBackdrop } from "../lib/dialog";
 
 
 
@@ -27,35 +28,29 @@ export default function Settings() {
         <h1 style={{textAlign:"center"}} >Settings</h1>
         <dialog // Fick nos om command/commandfor via Kevin Powell på instagram, väldigt smidigt sätt att hantera modaler på!
           id="password-modal"
-          style={{ display: "flex", flexDirection: "column" }}
+          className="sheet"
+          aria-labelledby="password-modal-title"
+          {...({ closedby: "any" } as React.DialogHTMLAttributes<HTMLDialogElement>)}
+          onClick={closeOnBackdrop}
         >
-          <button
-            type="button"
-            style={{
-              background: "transparent",
-              border: "none",
-              padding: "0",
-              cursor: "none",
-              display: "flex",
-            }}
-            className="close-modal"
-            {...({
-              command: "close",
-              commandfor: "password-modal",
-            } as React.HTMLAttributes<HTMLButtonElement>)}
-          >
-            <X
-              style={{ marginLeft: "auto" }}
-
-              width={32}
-              height={32}
-            />
-          </button>
-          <div className="modal-form-container">
-            <p style={{ width: "90%", fontWeight:"300" }}>
-              Here you can change your password. Just enter a new password and confirm it by entering it again. <br />Make sure to choose a strong password with at least <strong>8 characters</strong>  that you haven't used before for better security.
-            </p>
+          <span className="sheet-handle" aria-hidden="true" />
+          <div className="sheet-header">
+            <h2 id="password-modal-title" className="sheet-title">Change password</h2>
+            <button
+              type="button"
+              className="sheet-close press"
+              aria-label="Close"
+              {...({
+                command: "close",
+                commandfor: "password-modal",
+              } as React.HTMLAttributes<HTMLButtonElement>)}
+            >
+              <X width={20} height={20} aria-hidden="true" />
+            </button>
           </div>
+          <p className="sheet-intro">
+            Here you can change your password. Just enter a new password and confirm it by entering it again. Make sure to choose a strong password with at least <strong>8 characters</strong> that you haven't used before for better security.
+          </p>
           <ChangePasswordForm/>
         </dialog>
       {/* <div style={{marginLeft:"auto"}} className="language-toggle-container">
@@ -71,37 +66,21 @@ export default function Settings() {
           </div>
         </div> */}
         <div className='settings-btn-wrapper'>
-          <div className='default-Btn'>
           <button
-
-          type="button"
-          style={{
-              background: "transparent",
-              border: "none",
-              padding: "0",
-              cursor: "none",
-              display: "flex",
-              color:"white",
-              fontSize:"16px",
-              gap:"5px"
-            , alignItems:"center"
-            }}
-
-
+            type="button"
+            className="default-Btn press"
             {...({
               command: "show-modal",
               commandfor: "password-modal",
             } as React.HTMLAttributes<HTMLButtonElement>)} >
-            <RectangleEllipsis name='change-password' />
-           <label htmlFor="change-password">Change Password</label>
+            <RectangleEllipsis aria-hidden="true" />
+            Change Password
           </button>
 
-          </div>
-
-          <div onClick={handleLogout} className="default-Btn" >
-            {<LogOut name="logoutButton"  />}
-            <label htmlFor="logoutbutton">Log out</label>
-          </div>
+          <button type="button" onClick={handleLogout} className="default-Btn press">
+            <LogOut aria-hidden="true" />
+            Log out
+          </button>
         </div>
       </section>
     </LayoutWrapper>

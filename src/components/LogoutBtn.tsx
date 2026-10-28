@@ -12,10 +12,10 @@ function handleLogout() {
     }
   return (
     <>
-    <div className="default-Btn user-page-logout" onClick={handleLogout}>
-      {<LogOut name="logoutButton"  />}
-      <label htmlFor="logoutButton">Log out</label>
-    </div>
+    <button type="button" className="default-Btn user-page-logout press" onClick={handleLogout}>
+      <LogOut aria-hidden="true" />
+      Log out
+    </button>
     </>
   )
 }

@@ -231,11 +231,11 @@ export default function Approvals() {
                           key="hours"
                         >
                           <div
-                            style={{ backgroundColor: "rgb(232, 240, 252)" }}
+                            style={{ backgroundColor: "var(--brand-50)" }}
                             className="summary-icon-wrapper"
                           >
                             <Clock
-                              style={{ color: "rgb(67, 150, 196)" }}
+                              style={{ color: "var(--brand-600)" }}
                               height={34}
                               width={34}
                             />
@@ -273,11 +273,11 @@ export default function Approvals() {
                           key="salary"
                         >
                           <div
-                            style={{ backgroundColor: "rgb(232, 240, 252)" }}
+                            style={{ backgroundColor: "var(--brand-50)" }}
                             className="summary-icon-wrapper"
                           >
                             <CircleDollarSign
-                              style={{ color: "rgb(67, 150, 196)" }}
+                              style={{ color: "var(--brand-600)" }}
                               height={34}
                               width={34}
                             />

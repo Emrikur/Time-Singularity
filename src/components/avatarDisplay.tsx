@@ -12,7 +12,7 @@ const { avatar } = useAuth();
   return (
     <>
       <div>
-        <img style={{border:"2px solid black", margin:"1rem auto",borderRadius:"50%", backgroundColor:"pink", width:"192px", height:"192px"}} src={avatarSrc(previewAvatar ?? avatar)} alt="" />
+        <img style={{border:"2px solid var(--brand-500)", margin:"1rem auto",borderRadius:"50%", backgroundColor:"pink", width:"192px", height:"192px"}} src={avatarSrc(previewAvatar ?? avatar)} alt="" />
 
       </div>
     </>

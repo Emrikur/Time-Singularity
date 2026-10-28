@@ -1,22 +1,22 @@
-
-
 .header{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 20px;
-    background-color: var(--social-bg);
-    color: #333;
+    padding: 18px 20px 14px;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, .86);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .userHub{
   display: flex;
   align-items: center;
-  margin-right: 2rem;
   gap: 20px;
 }
 .mobile-logo-header{
@@ -29,11 +29,12 @@
 }
 
 #logo-company-header{
-  font-family: 'Manrope', sans-serif;
-  font-weight: 600;
-  font-size: 1.5rem;
-  color:black;
-margin:auto 0 auto 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
 
 }
 .header-home-link{
@@ -41,10 +42,11 @@ margin:auto 0 auto 1rem;
   width: 35px;
 }
 
+/* 40px image + 2px border on each side = a 44px touch target */
 #user-avatar{
 margin:0 0;
-border:3px solid black;
+border:2px solid var(--brand-500);
 border-radius:50%;
-height: 35px;
-width: 35px;
+height: 40px;
+width: 40px;
 }

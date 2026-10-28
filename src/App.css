@@ -50,5 +50,5 @@
   width: 100%;
   flex-shrink: 0;
   z-index: 99;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
 }

@@ -8,6 +8,10 @@
   height:fit-content;
 }
 
+.filter-section {
+  width: 90vw;
+}
+
 /* Dashboard variant of the shared .filterToggles pill (filterToggles.css);
    each option shows its date range on a second line */
 .timegraph-wrapper {
@@ -19,11 +23,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 52px;
   }
 
   .filter-range {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
   }
 }
@@ -33,87 +36,167 @@
   font-size: 20px;
 }
 
-.donut-graph{
-  height: 5rem;
-  width: 90vw;
-}
-
+/* Background and text colour come from .surface-drift */
 .week-hour-summary {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  border-radius: 10px;
-  padding: 5px 0;
+  gap: 12px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-brand);
+  padding: 18px 18px 18px 20px;
   width: 90vw;
-  color: white;
-  text-align: right;
-  background: #4292fb;
-  background: linear-gradient(
-    180deg,
-    rgba(66, 146, 251, 1) 0%,
-    #2f4ce5 100%
-  );
+  box-sizing: border-box;
+  text-align: left;
 }
 .week-summary-data {
   display: flex;
   flex-direction: column;
   text-align: left;
-  padding-left: 1rem;
+  min-width: 0;
 
   p {
     margin: 0;
   }
 
+  .week-summary-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .week-summary-range,
+  .week-summary-goal {
+    font-size: 13px;
+    color: var(--on-brand-2);
+  }
+
+  .week-summary-range {
+    margin-top: 2px;
+  }
+
   .week-sum {
-    font-size: 28px;
+    margin-top: 10px;
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .week-sum-unit {
+    font-size: 16px;
     font-weight: 600;
   }
 }
 .week-summary-chart {
-  padding-right: 1rem;
+  flex-shrink: 0;
+  display: flex;
+}
+.week-summary-percent {
+  font-family: var(--font-display);
+  font-weight: 700;
 }
 
-.graph-table-container {
-  height: 200px;
-  margin-top: 2rem;
-  overflow-y: auto;
+.chart-card {
   width: 90vw;
+  box-sizing: border-box;
+  margin-top: 1rem;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
-.graph_data {
-  text-wrap: wrap;
-  font-size: 1rem;
-  text-align: left;
-  padding: 1rem;
-  padding-top: 0;
-  box-shadow: 0 1px 3px 0 gray;
-  background: #ffffff;
-  background: linear-gradient(
-    180deg,
-    rgb(255, 255, 255) 0%,
-    rgb(243, 243, 243) 100%
-  );
-  width: 100%;
+.chart-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 8px;
+}
 
-  .graph-data-headers {
-    z-index: 1;
-    position: sticky;
-    top: 0;
-    background-color: white;
-    transform: translateY(-2px);
+.chart-card-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.chart-card-total {
+  font-size: 13px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recent entries: one card, rows split by soft dividers */
+.graph-table-container {
+  margin-top: 1rem;
+  width: 90vw;
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  h3 {
+    margin: 0;
+    padding: 14px 16px 6px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
   }
 }
 
+.graph_data {
+  width: 100%;
+  border-collapse: collapse;
+  text-wrap: wrap;
+  font-size: 14px;
+  text-align: left;
+
+  th {
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+    text-transform: capitalize;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  a {
+    color: var(--brand-500);
+  }
+}
+
+.entry-row {
+  cursor: pointer;
+  transition: background-color .15s ease, transform var(--press);
+}
+.entry-row:hover {
+  background: #F3F5FC;
+}
+.entry-row:active {
+  transform: scale(.985);
+}
+
 .missing-graph-data {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 60px;
-  font-size: 1rem;
-  padding: 1rem;
-  box-shadow: 0 1px 3px 0 gray;
+  margin: 0;
+  padding: 1.5rem 0.5rem;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-2);
+
+  a {
+    color: var(--brand-500);
+  }
 }
 
 .add-time-Btn {
@@ -126,8 +209,8 @@
   height: 44px;
   margin: 16px auto;
   width: 200px;
-  border-radius: 10px;
-  background-color: #34B567;
+  border-radius: var(--radius-md);
+  background-color: var(--success);
   color: white;
   border: none;
 

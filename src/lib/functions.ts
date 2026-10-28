@@ -1,6 +1,7 @@
 import type { ChartData } from "chart.js";
 import type { Filter } from "./types";
 import axios from "axios";
+import { barColors } from "./chartConfig";
 
 
 
@@ -94,6 +95,12 @@ export function formatEventDateDayTime(dateTime: string | Date) {
 
 //! Format data for graph rendering
 
+// The bar for the current day/month stands out, the rest are muted
+function barColor(hours: number | null, isCurrent: boolean) {
+  if (!hours) return barColors.empty;
+  return isCurrent ? barColors.current : barColors.other;
+}
+
 export function formatGraphData(responseData: GraphEntry[], filter:Filter): ChartData<"bar", (number | null)[], string> {
 
   if (filter === "year") {
@@ -105,21 +112,24 @@ export function formatGraphData(responseData: GraphEntry[], filter:Filter): Char
     ))];
 
 
+  const currentMonth = new Date().toLocaleString("en-US", { month: "long" });
+  const monthHours = months.map((month) =>
+    responseData
+      .filter((e) => toLocalDate(e.work_date).toLocaleString("en-US", { month: "long" }) === month)
+      .reduce((sum, e) => sum + Number(e.hours_worked), 0)
+  );
+
   return {
     labels: months,
     datasets: [{
       label: "Hours",
-      data: months.map((month) =>
-        responseData
-          .filter((e) => toLocalDate(e.work_date).toLocaleString("en-US", { month: "long" }) === month)
-          .reduce((sum, e) => sum + Number(e.hours_worked), 0)
-      ),
-      backgroundColor: "rgba(53, 162, 235, 0.5)",
+      data: monthHours,
+      backgroundColor: monthHours.map((hours, i) => barColor(hours, months[i] === currentMonth)),
     }],
   };
 }
 
-const companies = [...new Set(responseData.reverse().map((company) => company.company_name))]
+const companies = [...new Set([...responseData].reverse().map((company) => company.company_name))]
 
 const dates = [...new Set(responseData.map((entry) => entry.work_date))].sort((a,b) => toLocalDate(a).getTime() - toLocalDate(b).getTime())
 
@@ -127,7 +137,9 @@ const dates = [...new Set(responseData.map((entry) => entry.work_date))].sort((a
     filter === "week" ? formatEventDateDayTime(date):
     formatEventDateTime(date))
 
-  const datasets = companies.map((company) => {
+  const today = new Date().toDateString();
+
+  const datasets = companies.map((company, index) => {
     const companyHours = dates.map((date) => {
       const dateEntry = responseData.find((e) => e.company_name === company && e.work_date === date)
       return dateEntry ? Number(dateEntry.hours_worked) : null
@@ -135,7 +147,10 @@ const dates = [...new Set(responseData.map((entry) => entry.work_date))].sort((a
     return {
       label:company,
       data:companyHours,
-      backgroundColor:`rgba(${Math.random() * 255}, ${Math.random() * 255}, 235, 0.5)`,
+      // A single company gets the current/other colouring; several need one colour each to stay apart
+      backgroundColor: companies.length === 1
+        ? companyHours.map((hours, i) => barColor(hours, toLocalDate(dates[i]).toDateString() === today))
+        : barColors.companies[index % barColors.companies.length],
       skipNull: true,
     }
 

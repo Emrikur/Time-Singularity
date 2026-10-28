@@ -198,12 +198,12 @@ function handleCompanyNav(companyId: number) {
       <div>
         {companies.filter(company => company.is_active).map((company) => (
           <div style={{ display: "flex", flexDirection: "row", alignItems: "center", height: "100%" }} key={company.id}>
-          <div className="company-card" style={{ border: "1px solid #ccc", margin: "10px 0", padding: "0 10px", borderRadius: "5px", height:"fit-content", width: "100%" }} key={company.org_number}>
+          <div className="company-card" style={{ border: "1px solid var(--line)", margin: "10px 0", padding: "0 10px", borderRadius: "var(--radius-lg)", background: "var(--surface)", boxShadow: "var(--shadow-sm)", height:"fit-content", width: "100%" }} key={company.org_number}>
             <h4 onClick={() =>handleCompanyNav(company.id)} className="company-title" style={{ margin: 0, textDecoration: "underline", cursor: "pointer" }}>{company.title}</h4>
             <p className="company-industry" style={{ margin: "5px 0" }}>Industry: {company.industry_type}</p>
             <p className="company-org-number" style={{ margin: "5px 0" }}>Org Nr: {company.org_number}</p>
           </div>
-          <div onClick={() => handleCompanyNav(company.id)} style={{ height: "85px", width: "fit-content", display: "flex", backgroundColor: "#f1f1f1", alignItems: "center" }}>
+          <div onClick={() => handleCompanyNav(company.id)} style={{ height: "85px", width: "fit-content", display: "flex", backgroundColor: "var(--line-soft)", alignItems: "center" }}>
             <ArrowRight/>
           </div>
           </div>

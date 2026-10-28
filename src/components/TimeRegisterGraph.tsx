@@ -11,6 +11,7 @@ import { formatEventDateTime } from "../lib/functions";
 // import { formatWeekTime } from "../lib/functions";
 import { barOptions, doughnutOptions } from "../lib/chartConfig";
 import { X } from "lucide-react";
+import { useCountUp } from "../hooks/useCountUp";
 
 interface RefreshProps{
   refresh:boolean
@@ -37,6 +38,10 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
   const { token } = useAuth();
   const [filter, setGraphFilter] = useState<Filter>("week");
   const [responseData, setResponseData] = useState<GraphType[]>([]);
+  // The filter responseData was fetched for; the chart is keyed on it so the bars
+  // replay once the new data is in, not with the previous filter's data first
+  const [loadedFilter, setLoadedFilter] = useState<Filter>("week");
+  const [ringDrawn, setRingDrawn] = useState(false);
   const [currentWeek, setCurrentWeek] = useState<GraphType[]>([])
   const [selectedEntry, setSelectedEntry] = useState<GraphType | null>(null);
   const entryModalRef = useRef<HTMLDialogElement>(null);
@@ -46,6 +51,12 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
       entryModalRef.current.showModal();
     }
   }, [selectedEntry]);
+
+  // Start the ring empty and let it draw to its value on the next frame
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setRingDrawn(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   function closeEntryModal() {
     entryModalRef.current?.close();
@@ -63,6 +74,7 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
 
       const response = checkGraph.data.data;
       setResponseData(response);
+      setLoadedFilter(filter);
     }
 
 
@@ -95,7 +107,9 @@ const weekTarget = 40;
 const currentMonth = new Date().toLocaleDateString("en-US", { month: "short" })
 const circumference = 2 * Math.PI * 60
 const percentage = Math.min(currentHours / weekTarget, 1)
-const offset = circumference * (1 - percentage)
+const offset = ringDrawn ? circumference * (1 - percentage) : circumference
+const shownHours = useCountUp(currentHours, 1100)
+const totalHours = responseData.reduce((sum, entry) => sum + Number(entry.hours_worked), 0)
 
 const filterOptions: { value: Filter; label: string; range: string }[] = [
   { value: "week", label: "Week", range: weekRange(new Date()) },
@@ -107,33 +121,38 @@ const filterOptions: { value: Filter; label: string; range: string }[] = [
   return (
     <>
       <div className="graph-section-wrapper">
-        <div className="week-hour-summary" >
+        <div className="week-hour-summary surface-drift grain enter" style={{ "--i": 2 } as React.CSSProperties}>
 
           <div className="week-summary-data">
-          <h4 style={{margin:"0", fontWeight:"500"}}>This week</h4>
+          <h4 className="week-summary-title">This week</h4>
           {/* <p>{formatWeekTime(currentDate)}</p> */}
-          <p style={{marginTop:".5rem"}}>{weekRange(new Date())} {currentMonth} {new Date().getFullYear()}</p>
+          <p className="week-summary-range">{weekRange(new Date())} {currentMonth} {new Date().getFullYear()}</p>
 
-          {currentHours ? <p className="week-sum">{currentHours} <span style={{fontWeight:"500", fontSize:"16px"}}>hrs</span></p>  : <p className="week-sum">0<span style={{fontWeight:"500", fontSize:"16px"}}>hrs</span></p> }
-          <p>out of 40 hrs</p>
+          <p className="week-sum">{shownHours} <span className="week-sum-unit">hrs</span></p>
+          <p className="week-summary-goal">of {weekTarget} hrs</p>
           </div>
           <div className="week-summary-chart">
-            <svg width="125" height="125" viewBox="0 0 160 160">
-              <circle cx="80" cy="80" r="60" fill="none" stroke="#477beb" strokeWidth="16" opacity=".9" />
-              <circle cx="80" cy="80" r="60" fill="none" stroke={currentHours >= weekTarget ? "#34B567" : "#e5e7eb"} strokeWidth="16"
+            <svg width="120" height="120" viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r="60" fill="none" stroke="rgba(255, 255, 255, .22)" strokeWidth="12" />
+              <circle cx="80" cy="80" r="60" fill="none" strokeWidth="12"
                 strokeLinecap="round"
                 strokeDasharray={circumference}
                 strokeDashoffset={offset}
                 transform="rotate(-90 80 80)"
-                style={{ transition: "stroke-dashoffset 0.5s ease" }}
+                style={{
+                  stroke: currentHours >= weekTarget ? "var(--live-dot)" : "#fff",
+                  transition: "stroke-dashoffset 1.1s var(--ease-out)",
+                }}
               />
-              <text x="80" y="86" textAnchor="middle" fontSize="22" fontWeight="500" fill="currentColor">
+              {/* 26.7 viewBox units = 20px at the 120px rendered size */}
+              <text className="week-summary-percent" x="80" y="89" textAnchor="middle" fontSize="26.7" fill="currentColor">
                 {Math.round(percentage * 100)}%
               </text>
             </svg>
           </div>
         </div>
 
+        <div className="filter-section enter" style={{ "--i": 3 } as React.CSSProperties}>
         <p className="reg-hour-title">Registered Hours</p>
         <div
           className="filterToggles timegraph-wrapper"
@@ -152,9 +171,10 @@ const filterOptions: { value: Filter; label: string; range: string }[] = [
               onClick={() => setGraphFilter(option.value)}
             >
               {option.label}
-              <span className="filter-range">( {option.range} )</span>
+              <span className="filter-range">{option.range}</span>
             </button>
           ))}
+        </div>
         </div>
         {/* Graphs */}
         <div>
@@ -196,27 +216,30 @@ const filterOptions: { value: Filter; label: string; range: string }[] = [
             )}
           </dialog>
 
-          {responseData && responseData.length > 0 ? (
-            <div >
-              <div style={{marginBottom:"2rem"}}>
-
-                {filter ==="month" ?
-
-                    <Doughnut
-                    className="donut-graph"
-
-                      data={formatDoughnutData(responseData)}
-                      options={doughnutOptions}
-                    />
-
-
-                :
+          <section className="chart-card enter" style={{ "--i": 4 } as React.CSSProperties}>
+            <div className="chart-card-header">
+              <h3 className="chart-card-title">Hours logged</h3>
+              <span className="chart-card-total">{totalHours} hrs</span>
+            </div>
+            {responseData && responseData.length > 0 ? (
+              loadedFilter === "month" ?
+                <Doughnut
+                  key={loadedFilter}
+                  className="donut-graph"
+                  data={formatDoughnutData(responseData)}
+                  options={doughnutOptions}
+                />
+              :
                 <Bar
-                  style={{width:"90vw", height:"auto"}}
-                  data={formatGraphData(responseData, filter)}
-                  options={barOptions}/>}
+                  key={loadedFilter}
+                  data={formatGraphData(responseData, loadedFilter)}
+                  options={barOptions}/>
+            ) : (
+              <p className="missing-graph-data">No hours logged at these dates, report at <a href="/time-report">Time-report</a></p>
+            )}
+          </section>
 
-              </div>
+          {responseData && responseData.length > 0 && (
               <div className="graph-table-container">
                 <h3>Recent Entries:</h3>
                 <table
@@ -235,7 +258,7 @@ const filterOptions: { value: Filter; label: string; range: string }[] = [
                   <tbody>
 
                     {responseData && sortedData.slice(-5).reverse().map((p) => (
-                      <tr key={p.id} style={{ cursor: "pointer" }}
+                      <tr key={p.id} className="entry-row"
                         onClick={() => setSelectedEntry(p)}
                       >
 
@@ -261,12 +284,6 @@ const filterOptions: { value: Filter; label: string; range: string }[] = [
 
                 </table>
               </div>
-            </div>
-          ) : (
-
-              <p className="missing-graph-data">No hours logged at these dates, report at <a href="/time-report">Time-report</a></p>
-
-
           )}
         </div>
       </div>
