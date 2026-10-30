@@ -2,8 +2,9 @@ import '../assets/styles/settings.css'
 import LayoutWrapper from "../components/LayoutWrapper";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { LogOut, X, RectangleEllipsis } from "lucide-react";
+import { LogOut, X, RectangleEllipsis, Percent } from "lucide-react";
 import ChangePasswordForm from '../components/ChangePasswordForm';
+import TaxSettingsForm from '../components/TaxSettingsForm';
 import { closeOnBackdrop } from "../lib/dialog";
 
 
@@ -53,6 +54,33 @@ export default function Settings() {
           </p>
           <ChangePasswordForm/>
         </dialog>
+        <dialog
+          id="tax-modal"
+          className="sheet"
+          aria-labelledby="tax-modal-title"
+          {...({ closedby: "any" } as React.DialogHTMLAttributes<HTMLDialogElement>)}
+          onClick={closeOnBackdrop}
+        >
+          <span className="sheet-handle" aria-hidden="true" />
+          <div className="sheet-header">
+            <h2 id="tax-modal-title" className="sheet-title">Tax estimate</h2>
+            <button
+              type="button"
+              className="sheet-close press"
+              aria-label="Close"
+              {...({
+                command: "close",
+                commandfor: "tax-modal",
+              } as React.HTMLAttributes<HTMLButtonElement>)}
+            >
+              <X width={20} height={20} aria-hidden="true" />
+            </button>
+          </div>
+          <p className="sheet-intro">
+            Choose the tax rate used to estimate your net earnings in Statistics and on timesheet PDFs. It's only an estimate, your actual tax can differ.
+          </p>
+          <TaxSettingsForm/>
+        </dialog>
       {/* <div style={{marginLeft:"auto"}} className="language-toggle-container">
 
           <div className="checkbox-wrapper-10">
@@ -75,6 +103,17 @@ export default function Settings() {
             } as React.HTMLAttributes<HTMLButtonElement>)} >
             <RectangleEllipsis aria-hidden="true" />
             Change Password
+          </button>
+
+          <button
+            type="button"
+            className="default-Btn press"
+            {...({
+              command: "show-modal",
+              commandfor: "tax-modal",
+            } as React.HTMLAttributes<HTMLButtonElement>)} >
+            <Percent aria-hidden="true" />
+            Tax Estimate
           </button>
 
           <button type="button" onClick={handleLogout} className="default-Btn press">

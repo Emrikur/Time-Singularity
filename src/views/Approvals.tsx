@@ -15,6 +15,7 @@ import {
   fetchAdminTimesheets,
   fetchSubmittedEntries,
   formatEventDateTime,
+  formatSEK,
   handleApproval,
 } from "../lib/functions";
 import type { EntryTypes, TimesheetTypes } from "../lib/types";
@@ -203,11 +204,12 @@ export default function Approvals() {
                               <p style={{ textWrap: "nowrap" }}>
                                 {entry.hours_worked} h
                               </p>
-                              <p>€{entry.hourly_rate.split(".00")}/h</p>
+                              <p>{formatSEK(Number(entry.hourly_rate))}/h</p>
                               <p>
-                                €
-                                {Number(entry.hourly_rate) *
-                                  Number(entry.hours_worked)}{" "}
+                                {formatSEK(
+                                  Number(entry.hourly_rate) *
+                                    Number(entry.hours_worked),
+                                )}
                               </p>
                             </div>
                           </div>
@@ -285,8 +287,7 @@ export default function Approvals() {
                           <div className="total-salary-container">
                             <p className="total-salary-title">Total Cost:</p>
                             <p>
-                              €
-                              {entries
+                              {formatSEK(entries
                                 .filter(
                                   (entry) =>
                                     entry.user_id === timesheet.user_id &&
@@ -303,8 +304,7 @@ export default function Approvals() {
                                     Number(entry.hourly_rate) *
                                       Number(entry.hours_worked),
                                   0,
-                                )
-                                .toFixed(2)}
+                                ))}
                             </p>
                           </div>
                         </div>

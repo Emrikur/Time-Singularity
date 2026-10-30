@@ -48,6 +48,7 @@ export const MAX_EXPENSE = 100000;
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 72; // bcrypt använder bara de första 72 byten
 export const ALLOWED_ROLES = ["developer", "sales"];
+export const MAX_TAX_RATE = 60; // procent, egen uppskattning av skatten
 
 
 

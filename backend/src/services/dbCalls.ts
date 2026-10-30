@@ -202,6 +202,29 @@ const validatePassword = await bcrypt.compare(currentPassword, response.rows[0].
 
 
 
+// tax_rate is NULL until the user has saved a rate
+export async function queryTaxSettings(userId: string) {
+  const response = await pool.query(
+    `SELECT tax_rate, church_fee FROM users WHERE id = $1`,
+    [userId]
+  );
+  return response.rows[0] ?? { tax_rate: null, church_fee: false };
+}
+
+export async function queryUpdateTaxSettings(userId: string, taxRate: number, churchFee: boolean) {
+  await pool.query(
+    `UPDATE users SET tax_rate = $1, church_fee = $2 WHERE id = $3`,
+    [taxRate, churchFee, userId]
+  );
+  return { success: true, message: "Tax settings saved" };
+}
+
+
+
+//##############################################################################
+
+
+
 export async function queryDraftEntriesByUser(userId: string) {
  const response = await pool.query(
     `SELECT * FROM time_entries WHERE user_id = $1 AND status = 'draft' AND DATE_TRUNC('month', work_date) = DATE_TRUNC('month', NOW())`,

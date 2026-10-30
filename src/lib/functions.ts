@@ -1,5 +1,5 @@
 import type { ChartData } from "chart.js";
-import type { Filter } from "./types";
+import type { Filter, TaxSettings } from "./types";
 import axios from "axios";
 import { barColors } from "./chartConfig";
 
@@ -466,4 +466,35 @@ export async function fetchCompanyStatistics(token: string) {
 
 export function formatSEK(amount: number) {
   return `${new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 }).format(amount)} SEK`;
+}
+
+
+
+//##############################################################################
+
+
+// tax_rate comes back from Postgres NUMERIC as a string
+export async function fetchTaxSettings(token: string): Promise<TaxSettings> {
+  const response = await axios({
+    method: "get",
+    url: `${import.meta.env.VITE_API_URL}/user/tax-settings`,
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const { tax_rate, church_fee } = response.data;
+  return {
+    taxRate: tax_rate === null || tax_rate === undefined ? null : Number(tax_rate),
+    churchFee: Boolean(church_fee),
+  };
+}
+
+export async function updateTaxSettings(token: string, settings: { taxRate: number; churchFee: boolean }) {
+  const response = await axios({
+    method: "put",
+    url: `${import.meta.env.VITE_API_URL}/user/tax-settings`,
+    headers: { Authorization: `Bearer ${token}` },
+    data: settings,
+  });
+
+  return response.data;
 }
