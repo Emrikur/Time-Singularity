@@ -1,5 +1,5 @@
 import {queryAddNewUser, queryEmailExists, queryAdminTS, querySubmittedEntries, querySetTimesheetApproval, querySetTimesheetRejection, querySetTimesheetForEdit, queryAllCompanies, queryAssignUserCompanies} from "../../services/dbCalls"
-import { ALLOWED_ROLES, isEmail, isUuid, isValidPassword, parseNumberInRange } from "../validation";
+import { ALLOWED_ROLES, isEmail, isSerialId, isUuid, isValidPassword, parseNumberInRange } from "../validation";
 import { Request, Response } from "express";
 
 
@@ -48,7 +48,7 @@ const TIMESHEET_ACTIONS = {
 export async function setTimesheetApproval(req:Request, res:Response){
 const { timesheetId, action } = req.body;
 
-if (!isUuid(timesheetId)) {
+if (!isSerialId(timesheetId)) {
   return res.status(400).json({ success: false, message: "Invalid timesheet" });
 }
 if (!Object.prototype.hasOwnProperty.call(TIMESHEET_ACTIONS, action)) {

@@ -59,6 +59,12 @@ export function isUuid(value: unknown): value is string {
   return typeof value === "string" && UUID_REGEX.test(value);
 }
 
+// Tabeller med serial-id (t.ex. timesheets) skickar id som tal från pg
+export function isSerialId(value: unknown): value is number | string {
+  const id = typeof value === "string" && /^\d+$/.test(value) ? Number(value) : value;
+  return typeof id === "number" && Number.isSafeInteger(id) && id > 0 && id <= 2147483647;
+}
+
 export function isEmail(value: unknown): value is string {
   return typeof value === "string" && value.length <= 254 && EMAIL_REGEX.test(value);
 }

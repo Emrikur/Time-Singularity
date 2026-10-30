@@ -499,7 +499,7 @@ const response =await pool.query(`
 
 
 
-export async function querySetTimesheetApproval(timesheetId: string){
+export async function querySetTimesheetApproval(timesheetId: number | string){
 
   const client = await pool.connect();
 
@@ -531,7 +531,7 @@ export async function querySetTimesheetApproval(timesheetId: string){
   }
 }
 
-export async function querySetTimesheetRejection(timesheetId: string){
+export async function querySetTimesheetRejection(timesheetId: number | string){
   const client = await pool.connect();
 
   try {
@@ -559,7 +559,7 @@ export async function querySetTimesheetRejection(timesheetId: string){
   }
 }
 
-export async function querySetTimesheetForEdit(timesheetId: string){
+export async function querySetTimesheetForEdit(timesheetId: number | string){
   const client = await pool.connect();
 
   try {
