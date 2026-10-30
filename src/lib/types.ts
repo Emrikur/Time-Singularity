@@ -73,3 +73,9 @@ export interface CompanyStatisticsTypes{
       total_hours:string;
       total_earnings:string;
 }
+
+// taxRate is null until the user has saved a rate in Settings
+export interface TaxSettings{
+      taxRate:number | null;
+      churchFee:boolean;
+}

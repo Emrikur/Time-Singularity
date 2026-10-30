@@ -10,12 +10,14 @@ import { barOptions, doughnutOptions } from "../lib/chartConfig";
 import {
   fetchCompanyStatistics,
   fetchStatisticsEntries,
+  fetchTaxSettings,
   formatDoughnutData,
   formatGraphData,
   formatSEK,
   toLocalDate,
 } from "../lib/functions";
-import type { CompanyStatisticsTypes, StatisticsEntryTypes } from "../lib/types";
+import type { CompanyStatisticsTypes, StatisticsEntryTypes, TaxSettings } from "../lib/types";
+import { estimateTax, formatTaxLabel } from "../lib/tax";
 
 function formatHours(hours: number) {
   return Number(hours.toFixed(2));
@@ -26,6 +28,7 @@ export default function Statistics() {
   const navigate = useNavigate();
   const [entries, setEntries] = useState<StatisticsEntryTypes[]>([]);
   const [companies, setCompanies] = useState<CompanyStatisticsTypes[]>([]);
+  const [taxSettings, setTaxSettings] = useState<TaxSettings | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -36,7 +39,8 @@ export default function Statistics() {
     Promise.allSettled([
       fetchStatisticsEntries(token),
       fetchCompanyStatistics(token),
-    ]).then(([entryResult, companyResult]) => {
+      fetchTaxSettings(token),
+    ]).then(([entryResult, companyResult, taxResult]) => {
       if (entryResult.status === "fulfilled") {
         setEntries(entryResult.value);
       } else {
@@ -48,6 +52,11 @@ export default function Statistics() {
       } else {
         toast.error("Could not load company statistics");
       }
+
+      // Without tax settings the net estimate is just hidden
+      if (taxResult.status === "fulfilled") {
+        setTaxSettings(taxResult.value);
+      }
     });
   }, [navigate, token]);
 
@@ -55,6 +64,7 @@ export default function Statistics() {
   // hourly_rate comes from the users table via the backend, the same on every row
   const hourlyRate = entries.length > 0 ? Number(entries[0].hourly_rate) : 0;
   const totalEarnings = totalHours * hourlyRate;
+  const taxEstimate = taxSettings ? estimateTax(totalEarnings, taxSettings) : null;
 
   const currentYear = new Date().getFullYear();
   const currentYearEntries = entries.filter(
@@ -77,6 +87,14 @@ export default function Statistics() {
             <p className="statistics-card-label">Total earnings</p>
             <p className="statistics-card-value">{formatSEK(totalEarnings)}</p>
           </div>
+          {taxSettings && taxEstimate ? (
+            <div className="statistics-card">
+              <p className="statistics-card-label">
+                Est. net earnings ({formatTaxLabel(taxSettings)} tax)
+              </p>
+              <p className="statistics-card-value">{formatSEK(taxEstimate.net)}</p>
+            </div>
+          ) : null}
           <div className="statistics-card">
             <p className="statistics-card-label">Companies</p>
             <p className="statistics-card-value">{companies.length}</p>

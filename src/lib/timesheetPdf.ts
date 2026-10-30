@@ -1,5 +1,6 @@
-import type { EntryTypes, TimesheetTypes } from "./types";
+import type { EntryTypes, TaxSettings, TimesheetTypes } from "./types";
 import { toLocalDate } from "./functions";
+import { estimateTax, formatTaxLabel } from "./tax";
 
 function parseNumericValue(value: string | null | undefined) {
   const parsedValue = Number(value);
@@ -33,6 +34,7 @@ function formatPdfDate(value: string, options: Intl.DateTimeFormatOptions) {
 export async function downloadTimesheetPdf(
   timesheet: TimesheetTypes,
   entries: EntryTypes[],
+  taxSettings: TaxSettings | null = null,
 ) {
   // Loaded on demand so the PDF libraries aren't part of the main bundle
   const [{ jsPDF }, autoTableModule] = await Promise.all([
@@ -93,6 +95,7 @@ export async function downloadTimesheetPdf(
     (total, entry) => total + parseNumericValue(entry.expense),
     0,
   );
+  const taxEstimate = taxSettings ? estimateTax(totalEarnings, taxSettings) : null;
 
   autoTable(doc, {
     startY: 54,
@@ -136,7 +139,16 @@ export async function downloadTimesheetPdf(
           ],
         ]
       : []),
-    ["Total earnings", `${formatPdfNumber(totalEarnings)} SEK`],
+    ...(taxSettings && taxEstimate
+      ? [
+          ["Total earnings (gross)", `${formatPdfNumber(totalEarnings)} SEK`],
+          [
+            `Estimated tax (${formatTaxLabel(taxSettings)})`,
+            `-${formatPdfNumber(taxEstimate.tax)} SEK`,
+          ],
+          ["Estimated net earnings", `${formatPdfNumber(taxEstimate.net)} SEK`],
+        ]
+      : [["Total earnings", `${formatPdfNumber(totalEarnings)} SEK`]]),
     ...(mileageEntries.length > 0
       ? [["Total mileage", `${formatPdfNumber(totalMileage, 0)} km`]]
       : []),

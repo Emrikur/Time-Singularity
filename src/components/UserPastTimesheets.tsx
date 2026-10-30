@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import "../assets/styles/filterToggles.css"
 import "../assets/styles/UserPastTimesheets.css"
-import {fetchTimesheets, fetchUserTimesheetEntries, formatEventDateTime} from "../lib/functions"
+import {fetchTaxSettings, fetchTimesheets, fetchUserTimesheetEntries, formatEventDateTime} from "../lib/functions"
 import { useAuth } from "../hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { ChevronDown, Download } from "lucide-react";
@@ -55,7 +55,12 @@ if(!token){
       const timesheetEntries = entries.filter(
         (entry) => entry.timesheet_id === timesheet.id,
       );
-      await downloadTimesheetPdf(timesheet, timesheetEntries);
+      // Fetched at download time so the PDF uses the latest saved rate,
+      // and a failed lookup still gives a PDF, just without the tax lines
+      const taxSettings = token
+        ? await fetchTaxSettings(token).catch(() => null)
+        : null;
+      await downloadTimesheetPdf(timesheet, timesheetEntries, taxSettings);
     } catch (error) {
       console.error("Could not generate timesheet PDF", error);
       toast.error("Could not generate timesheet PDF");

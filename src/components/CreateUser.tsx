@@ -116,7 +116,7 @@ try {
           <option value="developer">Developer</option>
           <option value="sales">Sales</option>
         </select>
-        <label htmlFor="salary">Hourly rate (€):</label>
+        <label htmlFor="salary">Hourly rate (SEK):</label>
         <input type="number" id="salary" name="salary" step="1" />
         <label htmlFor="status">Status:</label>
         <select id="status" name="status">

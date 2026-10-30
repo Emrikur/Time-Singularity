@@ -1,5 +1,5 @@
-import {queryDraftEntriesByUser, queryupdateAvatar, queryupdatePassword, querydeleteSingleEntry, querySignoff, queryTimesheets, queryUpdateDraftEntry, queryUserTimesheetEntries, queryUserHasCompany } from "../../services/dbCalls";
-import { isAvatarName, isUuid, isValidDate, isValidPassword, MAX_HOURS_PER_ENTRY, parseNumberInRange, validateEntry } from "../validation";
+import {queryDraftEntriesByUser, queryupdateAvatar, queryupdatePassword, querydeleteSingleEntry, querySignoff, queryTimesheets, queryUpdateDraftEntry, queryUserTimesheetEntries, queryUserHasCompany, queryTaxSettings, queryUpdateTaxSettings } from "../../services/dbCalls";
+import { isAvatarName, isUuid, isValidDate, isValidPassword, MAX_HOURS_PER_ENTRY, MAX_TAX_RATE, parseNumberInRange, validateEntry } from "../validation";
 
 
 
@@ -54,6 +54,46 @@ try {
 }
 
 }
+
+
+//##############################################################################
+
+
+
+export async function getTaxSettings(req: Request, res: Response) {
+try {
+  const data = await queryTaxSettings(req.userId);
+  res.json(data)
+} catch (error) {
+  console.error("Error fetching tax settings: ", error);
+  res.status(500).json({ success: false, message: "Could not fetch tax settings" });
+}
+}
+
+export async function updateTaxSettings(req: Request, res: Response) {
+const { taxRate, churchFee } = req.body;
+
+const rate = parseNumberInRange(taxRate, 0, MAX_TAX_RATE);
+if (rate === null) {
+  return res.status(400).json({ success: false, message: `Tax rate must be between 0 and ${MAX_TAX_RATE}%` });
+}
+if (typeof churchFee !== "boolean") {
+  return res.status(400).json({ success: false, message: "Invalid church fee" });
+}
+
+try {
+  const data = await queryUpdateTaxSettings(req.userId, rate, churchFee);
+  res.json(data)
+} catch (error) {
+  console.error("Error updating tax settings: ", error);
+  res.status(500).json({ success: false, message: "Could not save tax settings" });
+}
+}
+
+
+
+//##############################################################################
+
 
 
 // get the user time entries for timesheet display
