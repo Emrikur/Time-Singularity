@@ -141,8 +141,11 @@ const dates = [...new Set(responseData.map((entry) => entry.work_date))].sort((a
 
   const datasets = companies.map((company, index) => {
     const companyHours = dates.map((date) => {
-      const dateEntry = responseData.find((e) => e.company_name === company && e.work_date === date)
-      return dateEntry ? Number(dateEntry.hours_worked) : null
+      // Sums every entry, so a second entry on the same day and company adds to the bar
+      const dateEntries = responseData.filter((e) => e.company_name === company && e.work_date === date)
+      return dateEntries.length > 0
+        ? dateEntries.reduce((sum, e) => sum + Number(e.hours_worked), 0)
+        : null
     })
     return {
       label:company,
