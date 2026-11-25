@@ -64,6 +64,9 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
   }
 
   useEffect(() => {
+    // Ignores a response that arrives after a newer filter/refresh has been requested
+    let stale = false;
+
     async function getGraph() {
       const checkGraph = await axios({
         method: "get",
@@ -72,6 +75,7 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
         data: { filterData: filter },
       });
 
+      if (stale) return;
       const response = checkGraph.data.data;
       setResponseData(response);
       setLoadedFilter(filter);
@@ -79,9 +83,13 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
 
 
     getGraph();
+    return () => { stale = true; };
   }, [filter, refresh, token]);
 
+  // Refetched on refresh too, so the week counter and ring follow new entries
   useEffect(() => {
+  let stale = false;
+
   async function fetchWeekTotal() {
     const response = await axios({
       method: "get",
@@ -89,12 +97,13 @@ export default function TimeRegisterGraph({refresh}: RefreshProps) {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-
+    if (stale) return;
     setCurrentWeek(response.data.data);
   }
 
   fetchWeekTotal();
-}, [token]);
+  return () => { stale = true; };
+}, [refresh, token]);
 
 const sortedData = [...responseData].sort(
     (a, b) => new Date(a.work_date).getTime() - new Date(b.work_date).getTime()
